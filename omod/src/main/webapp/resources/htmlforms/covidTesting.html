@@ -1,0 +1,273 @@
+<!--
+  ~ The contents of this file are subject to the OpenMRS Public License
+  ~ Version 1.0 (the "License"); you may not use this file except in
+  ~ compliance with the License. You may obtain a copy of the License at
+  ~ http://license.openmrs.org
+  ~
+  ~ Software distributed under the License is distributed on an "AS IS"
+  ~ basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+  ~ License for the specific language governing rights and limitations
+  ~ under the License.
+  ~
+  ~ Copyright (C) OpenMRS, LLC.  All Rights Reserved.
+
+-->
+<htmlform>
+
+    <macros>
+      </macros>
+
+    <script type="text/javascript" src="../moduleResources/kenyaemr/scripts/moment.js"></script>
+
+    <script type="text/javascript">
+
+        var tranferredOutConcept = 159492;
+        var referredConcept = 164165;
+        var dischargedConcept = 1692;
+		jq(document).ready(function(){
+            jq('#ag-rdt-test').hide();
+            jq('#pcr-test').hide();
+            jq('#had-rdt-test :input[type=radio]').change(function() {
+                var rdtTestQuestion = jq(this).val();
+                if(rdtTestQuestion == 1065) {
+                    jq('#ag-rdt-test').show();
+                } else {
+                    jq('#ag-rdt-test').hide(); 
+                }
+            });
+
+		});
+
+        //Clear hidden sections
+        clearSections = function(parentObj) {
+            parentObj.find('input[type=radio]').each(function() {
+                this.checked = false;
+            });
+            parentObj.find('input[type=checkbox]').each(function() {
+                this.checked = false;
+            });
+            parentObj.find('input[type=text]').each(function() {
+                jq(this).val("");
+            });
+            parentObj.find('select').each(function() {
+                this.selectedIndex =0;
+            });
+        }
+
+        beforeSubmit.push(function() {
+            //Before submit validations
+            pAge = parseInt('<lookup expression="patient.age"/>');
+            var encounterDate = getValue('encounter-date.value'); 
+            var hadRdtTest = getValue('had-rdt-test.value');
+            var rdtDate = jq('#rdt-date input[type=hidden]').val();
+            var caseType = jq('#case-type input[type="radio"]:checked').val();
+            var kitName = jq('#assay-kit-name input[type=text]').val();
+            var testType = jq('#rdt-test-type input[type="radio"]:checked').val();
+            var lotNumber = jq('#lot-number input[type=text]').val();
+            var kitExpiry = jq('#kit-expiry input[type=hidden]').val();
+            var covidResult = jq('#covid-result input[type="radio"]:checked').val();
+            var actionTaken = jq('#rdt-action-taken input[type="radio"]:checked').val();
+
+
+            
+
+                if( hadRdtTest == 1065 &amp;&amp; rdtDate == '' ) {
+                    getField('rdt-date.error').html('Please specify test date').show();
+                    return false
+                }
+
+                if( hadRdtTest == 1065 &amp;&amp; caseType == undefined ) {
+                    getField('case-type.error').html('Please specify case type').show();
+                    return false
+                }
+
+                if( hadRdtTest == 1065 &amp;&amp; kitName == '' ) {
+                    getField('assay-kit-name.error').html('Please specify kit name').show();
+                    return false
+                }
+
+                if( hadRdtTest == 1065 &amp;&amp; testType == undefined ) {
+                    getField('rdt-test-type.error').html('Please specify test type').show();
+                    return false
+                }
+
+                if( hadRdtTest == 1065 &amp;&amp; lotNumber == '' ) {
+                    getField('lot-number.error').html('Please specify lot number').show();
+                    return false
+                }
+
+                if( hadRdtTest == 1065 &amp;&amp; kitExpiry == '' ) {
+                    getField('kit-expiry.error').html('Please specify kit expiry').show();
+                    return false
+                }
+
+                if( hadRdtTest == 1065 &amp;&amp; covidResult == undefined ) {
+                    getField('covid-result.error').html('Please specify test result').show();
+                    return false
+                }
+
+                if( hadRdtTest == 1065 &amp;&amp; actionTaken == undefined ) {
+                    getField('rdt-action-taken.error').html('Please specify action taken').show();
+                    return false
+                }
+
+            return true;
+        });
+	</script>
+
+    <ifMode mode="EDIT">
+    <script type="text/javascript">
+        jq(document).ready(function(){
+
+        var val = getValue('had-rdt-test.value'); 
+        if (val == 1065){
+            jq('#ag-rdt-test').show();
+        }
+    });
+    </script>
+    </ifMode>
+
+
+    <style>
+
+
+        .disabled {
+            color: #ebebe4;
+    </style>
+
+    <div class="ke-form-header">
+        <table width="100%">
+            <tr>
+                <td align="left">Screening Date:
+                    <encounterDate id="encounter-date" showTime="true" />
+                </td>
+                <td align="right">Location:
+                    <encounterLocation default="GlobalProperty:kenyaemr.defaultLocation" type="autocomplete"/>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="ke-form-content">
+
+
+        <fieldset>
+            <legend>General information</legend>
+            <table>
+                <tr>
+					<td>Nationality</td>
+					<td colspan="3">
+                        <obs required="true" conceptId="165847AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" answerConceptSetIds="165657AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+					</td>
+				</tr>
+                <tr>
+					<td>Passport/ID Number</td>
+					<td colspan="3">
+                        <obs required="true" id="national_identification" conceptId="163084AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+					</td>
+				</tr>
+                <tr>
+                    <td>Sample type</td>
+                    <td>
+                        <obs required="true" conceptId="159959AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="163364AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,163362AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,162614AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1004AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1001AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="radio" answerLabels="NP swab,OP swab,NP/OP swab,Spatum,Serum" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>Reason for testing</td>
+                    <td>
+                        <obs required="true" conceptId="164126AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="1068AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,165850AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,5619AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,162277AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,165631AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1143AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="radio" answerLabels="Symptomatic,Contact with confirmed case,Health care worker,Prison remand,High risk client in health facility,Outbreak investigation"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Ag RDT test?</td>
+                    <td>
+                        <obs required="true" id="had-rdt-test" conceptId="165852AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"  labelText=" "
+                            answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                            style="radio" answerLabels="Yes,No"/>
+                    </td>
+                </tr>
+                <tr></tr>
+                <tr></tr>
+            </table>
+        </fieldset>
+        <fieldset id="ag-rdt-test">
+            <legend>Ag-RDT Testing</legend>
+
+            <table class="simple-table">
+                <obsgroup groupingConceptId="165852AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+
+                    <tr>
+                        <td>Date Ag-RDT Test</td>
+                        <td>
+                        <obs id="rdt-date" conceptId="162078AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" showTime="false"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Type of case</td>
+                        <td>
+                        <obs id="case-type" conceptId="162084AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                answerConceptIds="162080AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,162081AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                style="radio" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Assay kit name</td>
+                        <td>
+                            <obs conceptId="164963" size="50"
+                                 id="assay-kit-name"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Type of Ag-RDT test</td>
+                        <td>
+                            <obs conceptId="1271AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                answerConceptIds="165859,165611,5622"
+                                answerLabels="Panbio,Standard,Other"
+                                style="radio" id="rdt-test-type"/>
+                        </td>
+                        <td>
+                            Other (Specify) <obs conceptId="165398" size="50" id="other-rdt-test-type"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Lot No.</td>
+                        <td>
+                        <obs id="lot-number" conceptId="166455AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Lot expiry date</td>
+                        <td>
+                        <obs id="kit-expiry" conceptId="162502AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" allowFutureDates="true"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Antigen Result</td>
+                        <td>
+                            <obs conceptId="166638AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" " id="covid-result"
+                             answerConceptIds="664AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,703AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,163611AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1118AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="radio" answerLabels="Negative,Positive,Invalid,Not done"/>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>Action taken</td>
+                        <td>
+                            <obs id="rdt-action-taken" conceptId="1272AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"  labelText=" "
+                             answerConceptIds="159494AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,165093"
+                             style="radio" answerLabels="Referred to clinician,Preventive counseling"/>
+                        </td>
+                    </tr>
+                </obsgroup>
+		    </table>
+        </fieldset>
+    </div>
+    <div class="ke-form-footer">
+        <submit/>
+    </div>
+
+</htmlform>
