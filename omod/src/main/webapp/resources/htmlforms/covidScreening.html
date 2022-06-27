@@ -32,8 +32,8 @@
             jq("#covid-test-status :input[type=radio]").change(onPatientTestedForCovid);
             jq('#obs-other-symptom :input[type=radio]').change(onChangeOfOtherSymptoms);
             jq('.patient-symptom :input[type=radio]').change(onSelectOfCovidSymptoms);
-            jq('#client-eligibility :input[type=radio]').change(clientEligibleForTesting);
-            jq('#client-consent :input[type=radio]').change(clientConsentForTesting);
+ /*           jq('#client-eligibility :input[type=radio]').change(clientEligibleForTesting);
+            jq('#client-consent :input[type=radio]').change(clientConsentForTesting);*/
 
 		});
 
@@ -101,7 +101,7 @@
             }
         }
 
-        var clientEligibleForTesting = function () {
+        /*var clientEligibleForTesting = function () {
 
             var val = jq(this).val();
             if (val == 1065){
@@ -123,7 +123,7 @@
                 setValue('decline-reason.value','');
                 jq('.declined-consent').hide();
             }
-        }
+        }*/
 
 
 
@@ -153,9 +153,9 @@
             var lossOfTaste = jq('#obs-taste-smell input[type="radio"]:checked').val();
             var otherSymptomsQuestion = jq('#obs-other-symptom input[type="radio"]:checked').val();
 
-            var eligibilityQ = jq('#client-eligibility :input[type=radio]:checked').val();
+/*            var eligibilityQ = jq('#client-eligibility :input[type=radio]:checked').val();
             var consentQ = jq('#client-consent :input[type=radio]:checked').val();
-            var declineReasonResponse = jq('#decline-reason :input[type=text]').val();
+            var declineReasonResponse = jq('#decline-reason :input[type=text]').val();*/
 
 
                 if( symptomsOnsetDate == '' &amp;&amp; (
@@ -169,7 +169,7 @@
                     return false
                 }
 
-                if( eligibilityQ == 1065 &amp;&amp; consentQ == undefined ) {
+                /*if( eligibilityQ == 1065 &amp;&amp; consentQ == undefined ) {
                     getField('client-consent.error').html('Please record consent').show();
                     return false
                 }
@@ -177,7 +177,7 @@
                 if( consentQ == 'false' &amp;&amp; declineReasonResponse == '' ) {
                     getField('decline-reason.error').html('Please record reason for declining test').show();
                     return false
-                }
+                }*/
 
             return true;
         });
@@ -235,10 +235,10 @@
                 jq('#onset-date').show();
             }
 
-            if(clientEligibility == 1065) {
+/*            if(clientEligibility == 1065) {
                 jq('.consent').show();
                 jq('.declined-consent').show();
-            }
+            }*/
 
 		});
         </script>
@@ -541,18 +541,6 @@
                         <obs conceptId="165087" labelText=" " id="client-eligibility"
                              answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="radio" answerLabels="Yes,No" required="true"/>
-                    </td>
-                </tr>
-                <tr class="consent">
-                    <td>Consented for COVID-19 test</td>
-                    <td>
-                        <obs id="client-consent" conceptId="1710AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" " style="no_yes" noLabel="No" yesLabel="Yes"/>
-                    </td>
-                </tr>
-                <tr class="declined-consent">
-                    <td>Reason for declining COVID-19 test</td>
-                    <td>
-                        <obs id="decline-reason" conceptId="161011AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" style="textarea" />
                     </td>
                 </tr>
             </table>
