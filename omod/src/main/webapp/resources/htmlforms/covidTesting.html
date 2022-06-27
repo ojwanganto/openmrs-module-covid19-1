@@ -25,14 +25,29 @@
         var referredConcept = 164165;
         var dischargedConcept = 1692;
 		jq(document).ready(function(){
+		    jq('#general-information').hide();
             jq('#ag-rdt-test').hide();
+            jq('#tr-other-test-reason').hide();
             jq('#pcr-test').hide();
+            jq('.declined-consent').hide();
+            jq('#client-consent :input[type=radio]').change(clientConsentForTesting);
+
             jq('#had-rdt-test :input[type=radio]').change(function() {
                 var rdtTestQuestion = jq(this).val();
                 if(rdtTestQuestion == 1065) {
                     jq('#ag-rdt-test').show();
                 } else {
                     jq('#ag-rdt-test').hide(); 
+                }
+            });
+
+            jq('#test-reason :input[type=radio]').change(function() {
+                var testReasonQuestion = jq(this).val();
+                if(testReasonQuestion == 5622) {
+                    jq('#tr-other-test-reason').show();
+                } else {
+                    jq('#tr-other-test-reason').hide();
+                    setValue('other-test-reason.value','');
                 }
             });
 
@@ -54,11 +69,33 @@
             });
         }
 
+        var clientConsentForTesting = function () {
+
+            var val = jq(this).val();
+            if (val == 'false'){
+                jq('.declined-consent').show();
+                jq('#general-information').hide();
+                jq('#general-section').hide();
+            } else{
+                setValue('decline-reason.value','');
+                jq('.declined-consent').hide();
+                jq('#general-information').show();
+                jq('#general-section').show();
+            }
+        }
         beforeSubmit.push(function() {
             //Before submit validations
             pAge = parseInt('<lookup expression="patient.age"/>');
             var encounterDate = getValue('encounter-date.value'); 
+
+
+            var nationality = getValue('nationality.value');
+            var national_identification = getValue('national_identification.value');
+            var sample_type = getValue('sample-type.value');
+            var test_reason = getValue('test-reason.value');
+            var test_reason_other = getValue('other-test-reason.value');
             var hadRdtTest = getValue('had-rdt-test.value');
+
             var rdtDate = jq('#rdt-date input[type=hidden]').val();
             var caseType = jq('#case-type input[type="radio"]:checked').val();
             var kitName = jq('#assay-kit-name input[type=text]').val();
@@ -68,8 +105,35 @@
             var covidResult = jq('#covid-result input[type="radio"]:checked').val();
             var actionTaken = jq('#rdt-action-taken input[type="radio"]:checked').val();
 
+            var consentQ = jq('#client-consent :input[type=radio]:checked').val();
+            var declineReasonResponse = jq('#decline-reason textarea').val();
 
-            
+            if( consentQ == 'true' &amp;&amp; nationality == '' ) {
+                getField('nationality.error').html('Required').show();
+                return false
+            }
+            if( consentQ == 'true' &amp;&amp; national_identification == '' ) {
+                getField('national_identification.error').html('Required').show();
+                return false
+            }
+            if( consentQ == 'true' &amp;&amp; sample_type == false ) {
+                getField('sample-type.error').html('Required').show();
+                return false
+            }
+            if( consentQ == 'true' &amp;&amp; test_reason == false ) {
+                getField('test-reason.error').html('Required').show();
+                return false
+            }
+
+            if( test_reason == 5622 &amp;&amp; test_reason_other == '' ) {
+                getField('other-test-reason.error').html('Required').show();
+                return false
+            }
+
+            if( consentQ == 'true' &amp;&amp; hadRdtTest == false ) {
+                getField('had-rdt-test.error').html('Required').show();
+                return false
+            }
 
                 if( hadRdtTest == 1065 &amp;&amp; rdtDate == '' ) {
                     getField('rdt-date.error').html('Please specify test date').show();
@@ -111,6 +175,16 @@
                     return false
                 }
 
+                if( consentQ == undefined ) {
+                    getField('client-consent.error').html('Please record consent').show();
+                    return false
+                }
+
+                if( consentQ == 'false' &amp;&amp; declineReasonResponse == '' ) {
+                    jq('#decline-reason-other-error-field').html('Please record reason for declining test').show();
+                    return false
+                }
+
             return true;
         });
 	</script>
@@ -118,11 +192,22 @@
     <ifMode mode="EDIT">
     <script type="text/javascript">
         jq(document).ready(function(){
+            var clientConsent = getValue('client-consent.value');
+            var clientTested = getValue('had-rdt-test.value');
+            var otherTestReason = getValue('other-test-reason.value');
 
-        var val = getValue('had-rdt-test.value'); 
-        if (val == 1065){
-            jq('#ag-rdt-test').show();
-        }
+            if (clientConsent == 'true'){
+                jq('#general-information').show();
+            } else {
+                jq('.declined-consent').show()
+            }
+            if (clientTested == 1065){
+                jq('#ag-rdt-test').show();
+            }
+
+            if (otherTestReason != '') {
+                jq('#tr-other-test-reason').show();
+            }
     });
     </script>
     </ifMode>
@@ -149,27 +234,43 @@
     </div>
 
     <div class="ke-form-content">
-
-
         <fieldset>
-            <legend>General information</legend>
+            <legend>Client consent</legend>
             <table>
+                <tr class="consent">
+                    <td>Consented for COVID-19 test</td>
+                    <td>
+                        <obs id="client-consent" required="true" conceptId="1710AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" " style="no_yes" noLabel="No" yesLabel="Yes"/>
+                    </td>
+                </tr>
+                <tr class="declined-consent">
+                    <td>Reason for declining COVID-19 test</td>
+                    <td>
+                        <obs id="decline-reason" conceptId="161011AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" style="textarea" />
+                        <span class="error field-error" style="display: none" id="decline-reason-other-error-field"></span>
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+        <fieldset id="general-section">
+            <legend>General information</legend>
+            <table id="general-information">
                 <tr>
 					<td>Nationality</td>
 					<td colspan="3">
-                        <obs required="true" conceptId="165847AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" answerConceptSetIds="165657AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+                        <obs id="nationality" conceptId="165847AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" answerConceptSetIds="165657AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
 					</td>
 				</tr>
                 <tr>
 					<td>Passport/ID Number</td>
 					<td colspan="3">
-                        <obs required="true" id="national_identification" conceptId="163084AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+                        <obs id="national_identification" conceptId="163084AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
 					</td>
 				</tr>
                 <tr>
                     <td>Sample type</td>
                     <td>
-                        <obs required="true" conceptId="159959AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                        <obs id="sample-type" conceptId="159959AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
                              answerConceptIds="163364AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,163362AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,162614AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1004AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1001AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="radio" answerLabels="NP swab,OP swab,NP/OP swab,Spatum,Serum" />
                     </td>
@@ -177,15 +278,21 @@
                 <tr>
                     <td>Reason for testing</td>
                     <td>
-                        <obs required="true" conceptId="164126AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
-                             answerConceptIds="1068AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,165850AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,5619AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,162277AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,165631AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1143AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Symptomatic,Contact with confirmed case,Health care worker,Prison remand,High risk client in health facility,Outbreak investigation"/>
+                        <obs id="test-reason" conceptId="164126AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="1068AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,165850AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,5619AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,162277AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,165631AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1143AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,5622"
+                             style="radio" answerLabels="Symptomatic,Contact with confirmed case,Health care worker,Prison remand,High risk client in health facility,Outbreak investigation,Other"/>
                     </td>
+                </tr>
+                <tr id="tr-other-test-reason">
+                    <td>
+                        Other (Specify)
+                    </td>
+                    <td><obs conceptId="160632AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" size="50" id="other-test-reason"/></td>
                 </tr>
                 <tr>
                     <td>Ag RDT test?</td>
                     <td>
-                        <obs required="true" id="had-rdt-test" conceptId="165852AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"  labelText=" "
+                        <obs id="had-rdt-test" conceptId="165852AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"  labelText=" "
                             answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                             style="radio" answerLabels="Yes,No"/>
                     </td>
