@@ -46,6 +46,8 @@ covid_vaccination_status,
 ever_tested_for_covid,
 covid_test_date,
 eligible_for_covid_test,
+consented_for_covid_test,
+decline_reason,
 voided
 )
 select
@@ -91,6 +93,8 @@ select
   max(if(o.concept_id=165852,(case o.value_coded when 1065 then "Yes" when 1066 then "No" else "" end),null)) as ever_tested_for_covid,
   max(if(o.concept_id=159948,date(o.value_datetime),null)) as covid_test_date,
   max(if(o.concept_id=165087,(case o.value_coded when 1065 then "Yes" when 1066 then "No" else "" end),null)) as eligible_for_covid_test,
+  max(if(o.concept_id=1710,(case o.value_coded when 1 then "Yes" when 2 then "No" else "" end),null)) as consented_for_covid_test,
+  max(if(o.concept_id=161011, o.value_text, null)) as decline_reason,
 	e.voided as voided
 from encounter e
 	inner join person p on p.person_id=e.patient_id and p.voided=0
@@ -101,7 +105,7 @@ from encounter e
 	) f on f.form_id=e.form_id
 	left outer join obs o on o.encounter_id=e.encounter_id and o.voided=0
 													 and o.concept_id in (159948,1730,1729,140238,122943,143264,163741,163336,164441,142412,122983,5219,6023,160388,
-                                                1123,1125,160687,1838,160632,5272,162619,162633,164918,1169,162309,163100,164134,159948,165163,165087)
+                                                1123,1125,160687,1838,160632,5272,162619,162633,164918,1169,162309,163100,164134,159948,165163,165087,1710,161011)
 where e.voided=0
 group by e.patient_id, e.encounter_id;
 
@@ -190,6 +194,8 @@ insert into kenyaemr_etl.etl_cca_covid_rdt_test(
 	visit_date,
 	encounter_provider,
 	date_created,
+    consented_for_covid_test,
+    decline_reason,
 	nationality,
 	passport_id_number,
 	sample_type,
@@ -215,10 +221,12 @@ select
 	date(e.encounter_datetime) as visit_date,
 	e.creator as encounter_provider,
 	e.date_created as date_created,
+    max(if(o.concept_id=1710,(case o.value_coded when 1 then "Yes" when 2 then "No" else "" end),null)) as consented_for_covid_test,
+    max(if(o.concept_id=161011, o.value_text, null)) as decline_reason,
 	max(if(o.concept_id=165847,cn.name,null)) as nationality,
 	max(if(o.concept_id=163084,o.value_text,null)) as passport_id_number,
 	max(if(o.concept_id=159959,(case o.value_coded when 163364 then "NP swab" when 163362 then "OP swab" when 162614 then "NP/OP swab" when 1004 then "Sputum" when 1001 then "Serum" else "" end),null)) as sample_type,
-	max(if(o.concept_id=164126,(case o.value_coded when 1068 then "Symptomatic" when 165850 then "Contact with confirmed case" when 5619 then "Health care worker" when 162277 then "Prison remand" when 165631 then "High risk client in health facility" when 1143 then "Outbreak investigation" else "" end),null)) as test_reason,
+	max(if(o.concept_id=164126,(case o.value_coded when 1068 then "Symptomatic" when 165850 then "Contact with confirmed case" when 5619 then "Health care worker" when 162277 then "Prison remand" when 165631 then "High risk client in health facility" when 1143 then "Outbreak investigation" when 5622 then "Other" else "" end),null)) as test_reason,
 	max(if(o.concept_id=165852,(case o.value_coded when 1065 then "Yes" when 1066 then "No" else "" end),null)) as ag_rdt_test_done,
 	ag_rdt.ag_rdt_test_date,
 	ag_rdt.case_type,
@@ -233,7 +241,7 @@ select
 from encounter e
 	inner join person p on p.person_id=e.patient_id and p.voided=0
 	inner join form f on f.form_id=e.form_id and f.uuid in ('820cbf10-54cd-11ec-bf63-0242ac130002')
-	left outer join obs o on o.encounter_id=e.encounter_id and o.voided=0 and o.concept_id in (165847,163084,159959,164126,165852)
+	left outer join obs o on o.encounter_id=e.encounter_id and o.voided=0 and o.concept_id in (1710,161011,165847,163084,159959,164126,165852,5622)
 	left join concept_name cn on cn.concept_id = o.value_coded and o.concept_id = 165847 and cn.concept_name_type='FULLY_SPECIFIED'
 	left join (
 		select

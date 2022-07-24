@@ -175,7 +175,9 @@ public class CCACovid19TreatmentCohortLibrary {
 	 */
 	public CohortDefinition consentedForCovidTest() {
 		SqlCohortDefinition cd = new SqlCohortDefinition();
-		String sqlQuery = "select patient_id from kenyaemr_etl.etl_cca_covid_screening where voided = 0 and date(visit_date) = date(:startDate) and consented_for_covid_test = 'Yes';";
+		String sqlQuery = "select patient_id from kenyaemr_etl.etl_cca_covid_screening where voided = 0 and date(visit_date) = date(:startDate) and consented_for_covid_test = 'Yes'\n"
+		        + "union \n"
+		        + "select patient_id from kenyaemr_etl.etl_cca_covid_rdt_test where voided = 0 and date(visit_date) = date(:startDate) and consented_for_covid_test = 'Yes';";
 		cd.setName("consentedForCovidTest;");
 		cd.setQuery(sqlQuery);
 		cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
@@ -191,7 +193,9 @@ public class CCACovid19TreatmentCohortLibrary {
 	 */
 	public CohortDefinition declinedCovidTest() {
 		SqlCohortDefinition cd = new SqlCohortDefinition();
-		String sqlQuery = "select patient_id from kenyaemr_etl.etl_cca_covid_screening where voided = 0 and date(visit_date) = date(:startDate) and consented_for_covid_test = 'No';";
+		String sqlQuery = "select patient_id from kenyaemr_etl.etl_cca_covid_screening where voided = 0 and date(visit_date) = date(:startDate) and consented_for_covid_test = 'No'\n"
+		        + "union \n"
+		        + "select patient_id from kenyaemr_etl.etl_cca_covid_rdt_test where voided = 0 and date(visit_date) = date(:startDate) and consented_for_covid_test = 'No'";
 		cd.setName("declinedCovidTest;");
 		cd.setQuery(sqlQuery);
 		cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
