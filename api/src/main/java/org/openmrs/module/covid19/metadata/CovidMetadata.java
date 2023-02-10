@@ -53,7 +53,9 @@ public class CovidMetadata extends AbstractMetadataBundle {
 		public static final String COVID_TESTING = "820cbccc-54cd-11ec-bf63-0242ac130002";
 		
 		public static final String COVID_CLINICAL_REVIEW = "5cfe07dd-4714-40dc-964f-c1fb65387727";
-		
+		public static final String DIABETES_HYPERTENSION_TREATMENT_INITIAL_ENCOUNTER = "1f22776c-9d35-48d5-ab56-9c751007bc63";
+		public static final String DIABETES_HYPERTENSION_TREATMENT_FOLLOWUP_ENCOUNTER = "7fb8da8a-0513-4bf4-961a-dcce3fa8c511";
+
 	}
 	
 	public static final class _Form {
@@ -72,7 +74,10 @@ public class CovidMetadata extends AbstractMetadataBundle {
 		public static final String COVID_TREATMENT_OUTCOME = "9a5d58c4-739a-11ea-bc55-0242ac130003";
 		
 		public static final String COVID_CLINICAL_REVIEW = "8fb6dabd-9c14-4d17-baac-97afaf3d203d";
-		
+
+		public static final String DIABETES_HYPERTENSION_TREATMENT_INITIAL_ENCOUNTER = "102246ff-04ac-4317-b58f-e0d82fd9afd9";
+		public static final String DIABETES_HYPERTENSION_TREATMENT_FOLLOWUP_ENCOUNTER = "5a2aa5b9-f6d3-4127-a65c-0d9dcfe2bd31";
+
 	}
 	
 	@Override
@@ -101,7 +106,12 @@ public class CovidMetadata extends AbstractMetadataBundle {
 		
 		install(encounterType("COVID-19 Clinical Review",
 		    "An encounter for clinical review of covid suspected/confirmed case", _EncounterType.COVID_CLINICAL_REVIEW));
-		
+
+		install(encounterType("DM-HTN Initial Encounter",
+				"Diabetes and Hypertension initial encounter", _EncounterType.DIABETES_HYPERTENSION_TREATMENT_INITIAL_ENCOUNTER));
+		install(encounterType("DM-HTN Continuation of care",
+				"Diabetes and Hypertension continuation of care encounter", _EncounterType.DIABETES_HYPERTENSION_TREATMENT_FOLLOWUP_ENCOUNTER));
+
 		install(form("COVID-19 Assessment form", null, _EncounterType.COVID_19_ASSESSMENT, "1",
 		    _Form.COVID_19_ASSESSMENT_FORM));
 		
@@ -119,6 +129,12 @@ public class CovidMetadata extends AbstractMetadataBundle {
 		
 		install(form("COVID-19 Clinical Review", "COVID-19 Clinical Review ", _EncounterType.COVID_CLINICAL_REVIEW, "1",
 		    _Form.COVID_CLINICAL_REVIEW));
+
+		install(form("DM-HTN Initial Encounter", "Diabetes-Hypertension Initial Encounter", _EncounterType.DIABETES_HYPERTENSION_TREATMENT_INITIAL_ENCOUNTER, "1",
+				_Form.DIABETES_HYPERTENSION_TREATMENT_INITIAL_ENCOUNTER));
+
+		install(form("DM-HTN Continuation of care", "Diabetes-Hypertension Continuation of care", _EncounterType.DIABETES_HYPERTENSION_TREATMENT_FOLLOWUP_ENCOUNTER, "1",
+				_Form.DIABETES_HYPERTENSION_TREATMENT_FOLLOWUP_ENCOUNTER));
 		
 		install(program("COVID-19 Treatment", "COVID-19 Treatment Program", _Concept.COVID_TREATMENT,
 		    _Program.COVID_TREATMENT));
