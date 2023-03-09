@@ -1,0 +1,872 @@
+<!--
+  ~ The contents of this file are subject to the OpenMRS Public License
+  ~ Version 1.0 (the "License"); you may not use this file except in
+  ~ compliance with the License. You may obtain a copy of the License at
+  ~ http://license.openmrs.org
+  ~
+  ~ Software distributed under the License is distributed on an "AS IS"
+  ~ basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+  ~ License for the specific language governing rights and limitations
+  ~ under the License.
+  ~
+  ~ Copyright (C) OpenMRS, LLC.  All Rights Reserved.
+
+-->
+<htmlform>
+
+    <script type="text/javascript" src="../moduleResources/kenyaemr/scripts/moment.js"></script>
+    <script type="text/javascript">
+
+            
+		jQuery(document).ready(function(){
+
+            jq('#tb-test-ordered').hide();
+            jq('#tb-results').hide();
+            jq('#referringFacilityRow').css('display','none');
+
+            jq('#patientReferral :input[type=radio]').change(showReferringFacility);
+            jq('#hasTbFeatures :input[type=radio]').change(showTBScreeningSections);
+
+		});
+
+        var showReferringFacility = function () {
+
+            var ans = getValue('patientReferral.value');
+            if (ans == "true") {
+                jq('#referringFacilityRow').show();
+            } else {
+                jq('#referringFacilityRow').hide();
+            }
+        }
+
+        var showTBScreeningSections = function () {
+
+            var val = jq(this).val();
+            if (val == 1065) {
+                jq('#tb-test-ordered').show()
+                jq('#tb-results').show()
+            } else {
+                clearHiddenSections([jq('#tb-test-ordered')]);
+                clearHiddenSections([jq('#tb-results')]);
+                jq('#tb-test-ordered').hide()
+                jq('#tb-results').hide()
+            }
+        }
+
+        beforeSubmit.push(function() {
+            //Before submit validations
+            pAge = parseInt('<lookup expression="patient.age"/>');
+            return true;
+        });
+
+        clearHiddenSections = function(parentObj) {
+            for(var i=0; i &lt; parentObj.length; i++){
+                parentObj[i].find('input[type=radio]').each(function() {
+                    this.checked = false;
+                });
+                parentObj[i].find('input[type=checkbox]').each(function() {
+                    this.checked = false;
+                });
+                parentObj[i].find('input[type=text]').each(function() {
+                    this.val("");
+                });
+                parentObj[i].find('select').each(function() {
+                    this.selectedIndex = 0;
+                });
+            }
+        }
+    </script>
+     
+     <ifMode mode="EDIT">
+        <script type="text/javascript">
+            jq(document).ready(function(){
+
+		});
+        </script>
+    </ifMode>
+
+    <style>
+
+    </style>
+
+    <div class="ke-form-header">
+        <table width="100%">
+            <tr>
+                <td align="left">Date:
+                    <encounterDate id="encounter-date" showTime="true" />
+                </td>
+                <td align="right">Location:
+                    <encounterLocation default="GlobalProperty:kenyaemr.defaultLocation" type="autocomplete"/>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="ke-form-content">
+
+
+        <fieldset>
+            <legend>Status of patient</legend>
+            <table>
+
+                <tr>
+                    <td>Type of visit</td>
+                    <td>
+                        <obs conceptId="1169AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="703AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,664AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1067AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1069AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="radio" answerLabels="Sick,Referred,Scheduled,Unscheduled" required="true"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Chief complaint</td>
+                    <td>
+                        <obs conceptId="1917AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerLabels="Yes,No" required="true" style="yes_no" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>Notes</td>
+                    <td>
+                        <obs id ="obs-specify-symptoms" conceptId="160632AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"  rows="4" cols="60" style="textarea"/>
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+        <fieldset>
+            <legend>NHIF Coverage</legend>
+            <table>
+                <tr>
+                    <td>Patient covered by NHIF</td>
+                    <td>
+                        <obs conceptId="1917AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerLabels="Yes,No" required="true" style="yes_no" />
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+        <fieldset>
+            <legend>Referral Status</legend>
+
+            <table>
+			<tr>
+				<td>Is patient a referral?</td>
+                <td>
+                    <obs id="patientReferral" conceptId="1648AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                            answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                            answerLabel="Yes,No" style="yes_no" required="true"/>
+                </td>
+			</tr>
+            <tr id="referringFacilityRow">
+                <td>If yes, specify referring facility</td>
+                <td>
+                    <obs conceptId="159371AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                         answerConceptIds="1555AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,159372AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,167050AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,160542AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,160473AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                         answerLabels="CHW,Dispensary,Inpatient,OPD,Casualty,Other" style="radio" required="true"/>
+                </td>
+            </tr>
+		</table>
+        </fieldset>
+        <fieldset>
+            <legend>Chief Complaints</legend>
+            <table>
+                <tr>
+                    <td>
+                        <obs class="patient-symptom" conceptId="5219AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="141600AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Shortness of breath on activity"/>
+                    </td>
+                    <td>
+                    <obs class="patient-symptom" conceptId="5219AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                         answerConceptId="130987AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                         style="checkbox" answerLabel="Palpitations (Heart racing)"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <obs class="patient-symptom" conceptId="5219AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="156046AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Recurrent dizziness"/>
+                    </td>
+                    <td>
+                        <obs class="patient-symptom" conceptId="5219AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="112961AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Fainting"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <obs class="patient-symptom" conceptId="5219AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="135966AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Leg swelling"/>
+                    </td>
+                    <td>
+                        <obs class="patient-symptom" conceptId="5219AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="135592AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Loss of consciousness"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <obs class="patient-symptom" conceptId="5219AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="147104AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Blurring of vision"/>
+                    </td>
+                    <td>
+                        <obs class="patient-symptom" conceptId="5219AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="6005AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Focal weakness"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <obs class="patient-symptom" conceptId="5219AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="116860AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Foot complaints"/>
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Notes</td>
+                    <td>
+                        <obs id ="complaints-notes" conceptId="160632AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" rows="3" cols="60"  style="textarea"/>
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+        <fieldset>
+            <legend>TB Screening</legend>
+            <table>
+                <tr>
+                    <td>Any features of TB? Cough, Night sweats, weight loss, lymph nodes</td>
+                    <td>
+                        <obs id="hasTbFeatures" conceptId="164800AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="radio" answerLabels="Yes,No" required="true"/>
+                    </td>
+                </tr>
+            </table>
+
+            <table id="tb-test-ordered">
+                <tr>
+                    <td>Tests Ordered:</td>
+                    <td><obs id="ord-sputum-smear" conceptId="1271AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" answerLabel="Sputum Smear" answerConceptId="307AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" style="checkbox" /><hr/></td>
+                    <td><obs id="ord-chest-xray" conceptId="1271AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" answerLabel="Chest Xray" answerConceptId="12AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" style="checkbox" /><hr/></td>
+                    <td><obs id="ord-gene-xpert" conceptId="1271AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" answerLabel="GeneXpert" answerConceptId="162202AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" style="checkbox" />
+                        <hr/> </td>
+                </tr>
+            </table>
+            <table id="tb-results">
+                <tr>
+                    <td>Sputum Smear:</td>
+                    <td><obs id="sputum-smear-action" conceptId="307AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" " answerConceptIds="703AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,664AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" answerLabels="Positive,Negative" style="radio" /></td>
+                </tr>
+                <tr>
+                    <td>Chest X-ray:</td>
+                    <td><obs id="chest-xray-action" conceptId="12AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" " answerConceptIds="1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,152526AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" style="radio" /></td>
+                </tr>
+                <tr>
+                    <td>GeneXpert:</td>
+                    <td>
+                        <obs id="genexpert-action" conceptId="162202AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             answerConceptIds="664AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,162203AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,162204AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,164104AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,163611AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1138AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="dropdown"
+                        />
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+        <fieldset>
+            <legend>Current lifestyle</legend>
+            <table>
+                <tr>
+                    <td>Tobacco use</td>
+                    <td>
+                        <obs conceptId="152722AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,158939AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="radio" answerLabels="Yes,No,Stopped" required="true"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Drink alcohol</td>
+                    <td>
+                        <obs conceptId="159449AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,159452AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="radio" answerLabels="Yes,No,Stopped" required="true"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Adequate physical activity</td>
+                    <td>
+                        <obs conceptId="159449AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,159452AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="radio" answerLabels="Yes,No,Stopped" required="true"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Healthy diet <br/>
+                        <span style="font-style: italic;font-size: 14px">(low salt and fats, hight fruits and vegetable intake and unrefined carbohydrates)</span></td>
+                    <td>
+                        <obs conceptId="159449AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,159452AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="radio" answerLabels="Yes,No,Stopped" required="true"/>
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+        <fieldset>
+            <legend>Pregnancy status</legend>
+            <table>
+                <tr>
+                    <td>Pregnancy status</td>
+                    <td>
+                        <obs conceptId="5272AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="1175AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="radio" answerLabels="N/A,Yes,No" required="true"/>
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+        <fieldset>
+            <legend>Existing Complications</legend>
+            <table>
+                <tr>
+                    <td>
+                        <obs class="complications" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="111103AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Stroke"/>
+                    </td>
+                    <td>
+                        <obs class="complications" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="159298AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Visual Impairment"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <obs class="complications" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="139069AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Heart failure"/>
+                    </td>
+                    <td>
+                        <obs class="complications" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="163411AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Foot ulcers/deformities"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <obs class="complications" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="6033AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Renal disease"/>
+                    </td>
+                    <td>
+                        <obs class="complications" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="116123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Erectile dysfunction"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <obs class="complications" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="118983AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Peripheral Neuropathy"/>
+                    </td>
+                    <td>
+                        <obs class="complications" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Others"/>
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+        <fieldset>
+            <legend>Physical examination</legend>
+            <table>
+                <tr>
+                    <td>Vital signs</td>
+                    <td>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td>General exam</td>
+                    <td>
+                        <obs conceptId="1119AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             answerConceptId="5245AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Pallor"/>&nbsp;&nbsp;&nbsp;
+
+                        <obs conceptId="1119AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             answerConceptId="136443AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Jaundice"/>&nbsp;&nbsp;&nbsp;
+
+                        <obs conceptId="1119AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             answerConceptId="143050AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Cyanosis"/>&nbsp;&nbsp;&nbsp;
+
+                        <obs conceptId="1119AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             answerConceptId="460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Edema"/>&nbsp;&nbsp;&nbsp;
+
+                        <obs conceptId="1119AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             answerConceptId="5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Other"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <obs conceptId="1119AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             answerConceptId="460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Edema"/>&nbsp;&nbsp;&nbsp;
+
+                        <obs conceptId="1119AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             answerConceptId="5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Other"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Cardiovascular</td>
+                    <td>
+                        <obs conceptId="1124AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1116AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="radio" answerLabels="Normal,Abnormal" required="true"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Respiratory</td>
+                    <td>
+                        <obs conceptId="1123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1116AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="radio" answerLabels="Normal,Abnormal" required="true"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Abdominal pelvic</td>
+                    <td>
+                        <obs conceptId="1125AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1116AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="radio" answerLabels="Normal,Abnormal" required="true"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Neurological exam</td>
+                    <td>
+                        <obs conceptId="1129AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1116AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="radio" answerLabels="Normal,Abnormal" required="true"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Oral exam</td>
+                    <td>
+                        <obs conceptId="163308AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1116AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="radio" answerLabels="Normal,Abnormal" required="true"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Mental health</td>
+                    <td>
+                        <obs conceptId="163043AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1116AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="radio" answerLabels="Normal,Abnormal" required="true"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Foot exam</td>
+                    <td>
+                        <obs conceptId="165471AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1116AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="radio" answerLabels="Normal,Abnormal" required="true"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Diabetic foot</td>
+                    <td>
+                        <obs conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptId="142452AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Yes" required="true"/>
+                    </td>
+                    <td>
+                        <obs conceptId="166879AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptId="166674AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="High Risk"/>
+                        &nbsp;&nbsp;&nbsp;
+                        <obs conceptId="162619AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptId="166675AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Low Risk"/>
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Other</td>
+                    <td>
+                        <obs conceptId="162619AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="166675AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="radio" answerLabels="Yes,No" required="true"/>
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+        <fieldset>
+            <legend>Drugs</legend>
+            <table>
+                <tr>
+                    <td>
+
+                    </td>
+                    <td>
+
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+        <fieldset>
+            <legend>Investigations</legend>
+            <table>
+                <tr>
+                    <td>Vital signs</td>
+                    <td>
+                        <obs conceptId="162619AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="radio" answerLabels="Yes,No" required="true"/>
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+
+
+        <fieldset>
+            <legend>Lifestyle Management</legend>
+            <table>
+                <tr>
+                    <td>
+                        <obs class="lifestyle-management" conceptId="166937AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="161595AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Diabetes and Hypertension Education"/>
+                    </td>
+                    <td>
+                        <obs class="lifestyle-management" conceptId="166937AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Physical Activities"/>
+                    </td>
+                    <td>
+                        <obs class="lifestyle-management" conceptId="166937AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="978AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Self care management"/>
+                    </td>
+                    <td>
+                        <obs class="lifestyle-management" conceptId="166937AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="167323AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Stress Management"/>
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+        <fieldset>
+            <legend>Treatment</legend>
+            <table>
+                <tr>
+                    <td>
+                        <fieldset>
+                            <legend>Glucose lowering drugs</legend>
+                            <table>
+                                <obsgroup groupingConceptId="159460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                                    <tr>
+                                        <td colspan="2">
+                                            <obs class="current-treatment" conceptId="1282AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                                 answerConceptId="1107AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                                 style="checkbox" answerLabel="None"/>
+                                        </td>
+                                    </tr>
+                                </obsgroup>
+                                <obsgroup groupingConceptId="159460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                                    <tr>
+                                        <td>
+                                            <obs class="current-treatment" conceptId="1282AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                                 answerConceptId="79651AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                                 style="checkbox" answerLabel="Metformin"/>
+                                        </td>
+                                        <td>
+
+                                        </td>
+                                    </tr>
+                                </obsgroup>
+
+                                <obsgroup groupingConceptId="159460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                                    <tr>
+                                        <td>
+                                            <obs class="current-treatment" conceptId="1282AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                                 answerConceptId="77071AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                                 style="checkbox" answerLabel="Glibenclamide"/>
+                                        </td>
+                                        <td>
+
+                                        </td>
+                                    </tr>
+                                </obsgroup>
+
+                                <obsgroup groupingConceptId="159460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                                    <tr>
+                                        <td>
+                                            <obs class="current-treatment" conceptId="1282AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                                 answerConceptId="78056AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                                 style="checkbox" answerLabel="Insulin"/>
+                                        </td>
+                                        <td>
+
+                                        </td>
+                                    </tr>
+                                </obsgroup>
+
+                                <obsgroup groupingConceptId="159460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                                    <tr>
+                                        <td>
+                                            <obs class="current-treatment" conceptId="1282AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                                 answerConceptId="78068AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                                 style="checkbox" answerLabel="NPH"/>
+                                        </td>
+                                        <td>
+
+                                        </td>
+                                    </tr>
+                                </obsgroup>
+
+                                <obsgroup groupingConceptId="159460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                                    <tr>
+                                        <td>
+                                            <obs class="current-treatment" conceptId="1282AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                                 answerConceptId="282AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                                 style="checkbox" answerLabel="Soluble insulin"/>
+                                        </td>
+                                        <td>
+
+                                        </td>
+                                    </tr>
+                                </obsgroup>
+
+                                <obsgroup groupingConceptId="159460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                                    <tr>
+                                        <td colspan="2">
+                                            <obs class="current-treatment" conceptId="1282AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                                 answerConceptId="5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                                 style="checkbox" answerLabel="Other"/>
+                                        </td>
+                                    </tr>
+                                </obsgroup>
+                            </table>
+                        </fieldset>
+                    </td>
+                    <td>
+                        <fieldset>
+                            <legend>Anti hypertensive agents</legend>
+                            <table>
+                                <obsgroup groupingConceptId="117399AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                                    <tr>
+                                        <td colspan="2">
+                                            <obs class="current-treatment" conceptId="1282AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                                 answerConceptId="1107AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                                 style="checkbox" answerLabel="None"/>
+                                        </td>
+                                    </tr>
+                                </obsgroup>
+                                <obsgroup groupingConceptId="117399AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                                    <tr>
+                                        <td>
+                                            <obs class="current-treatment" conceptId="1282AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                                 answerConceptId="75633AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                                 style="checkbox" answerLabel="Enalapril"/>
+                                        </td>
+                                        <td>
+
+                                        </td>
+                                    </tr>
+                                </obsgroup>
+
+                                <obsgroup groupingConceptId="117399AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                                    <tr>
+                                        <td>
+                                            <obs class="current-treatment" conceptId="1282AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                                 answerConceptId="77696AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                                 style="checkbox" answerLabel="HCTZ"/>
+                                        </td>
+                                        <td>
+
+                                        </td>
+                                    </tr>
+                                </obsgroup>
+
+                                <obsgroup groupingConceptId="117399AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                                    <tr>
+                                        <td>
+                                            <obs class="current-treatment" conceptId="1282AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                                 answerConceptId="79074AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                                 style="checkbox" answerLabel="Losartan"/>
+                                        </td>
+                                        <td>
+
+                                        </td>
+                                    </tr>
+                                </obsgroup>
+
+                                <obsgroup groupingConceptId="117399AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                                    <tr>
+                                        <td>
+                                            <obs class="current-treatment" conceptId="1282AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                                 answerConceptId="80637AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                                 style="checkbox" answerLabel="Nifedipine"/>
+                                        </td>
+                                        <td>
+
+                                        </td>
+                                    </tr>
+                                </obsgroup>
+
+                                <obsgroup groupingConceptId="117399AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                                    <tr>
+                                        <td>
+                                            <obs class="current-treatment" conceptId="1282AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                                 answerConceptId="71652AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                                 style="checkbox" answerLabel="Atenolol"/>
+                                        </td>
+                                        <td>
+
+                                        </td>
+                                    </tr>
+                                </obsgroup>
+
+                                <obsgroup groupingConceptId="117399AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                                    <tr>
+                                        <td colspan="2">
+                                            <obs class="current-treatment" conceptId="1282AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                                 answerConceptId="5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                                 style="checkbox" answerLabel="Other"/>
+                                        </td>
+                                    </tr>
+                                </obsgroup>
+                            </table>
+                        </fieldset>
+                    </td>
+                    <td>
+                        <fieldset>
+                            <legend>CVD Prophylaxis</legend>
+                            <table>
+                                <obsgroup groupingConceptId="119270AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                                    <tr>
+                                        <td>
+                                            <obs class="current-treatment" conceptId="1282AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                                 answerConceptId="71617AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                                 style="checkbox" answerLabel="J. ASA"/>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </obsgroup>
+                                <obsgroup groupingConceptId="119270AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                                    <tr>
+                                        <td>
+                                            <obs class="current-treatment" conceptId="1282AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                                 answerConceptId="71665AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                                 style="checkbox" answerLabel="Atorvastatin"/>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </obsgroup>
+                                <tr>
+                                    <td>
+                                        <br/>
+                                        <br/>
+                                        <br/>
+                                        <br/>
+                                        <br/>
+                                        <br/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </fieldset>
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+
+        <fieldset>
+            <legend>Investigations</legend>
+            <table>
+                <tr>
+                    <td>
+                        <obs class="tests-offered" conceptId="1271AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="1107AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="None"/>
+                    </td>
+                    <td>
+                        <obs class="tests-offered" conceptId="1271AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="302AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Urinalysis"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <obs class="tests-offered" conceptId="1271AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="159644AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="HbA1c"/>
+                    </td>
+                    <td>
+                        <obs class="tests-offered" conceptId="1271AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="849AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Microalbumin"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <obs class="tests-offered" conceptId="1271AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="159830AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Creatinine"/>
+                    </td>
+                    <td>
+                        <obs class="tests-offered" conceptId="1271AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="82340AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Potassium"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <obs class="tests-offered" conceptId="1271AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="161157AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="ECG"/>
+                    </td>
+                    <td>
+                        <obs class="tests-offered" conceptId="1271AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="160053AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Fasting lipid profile"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <obs class="tests-offered" conceptId="1271AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Other"/>
+                    </td>
+                    <td>
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+
+        <fieldset>
+            <legend>Follow up plan</legend>
+            <table>
+                    <tr>
+                        <td>
+                            Next appointment date
+                        </td>
+                        <td>
+                            <obs conceptId="5096AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+                        </td>
+                    </tr>
+            </table>
+        </fieldset>
+    </div>
+    <div class="ke-form-footer">
+        <submit/>
+    </div>
+
+</htmlform>

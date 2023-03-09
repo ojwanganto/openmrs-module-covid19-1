@@ -96,6 +96,8 @@
                 <ref bean="kenyaemr.covid.screening.form"/>
                 <ref bean="kenyaemr.covid.testing.form"/>
                 <ref bean="kenyaemr.covid.form.clinical.review"/>
+                <ref bean="kenyaemr.ncd.initial.encounter"/>
+                <ref bean="kenyaemr.ncd.followup.encounter"/>
             </set>
         </property>
     </bean>
@@ -226,6 +228,40 @@
 		<property name="order" value="201005" />
 	</bean>
 
+
+    <bean id="kenyaemr.ncd.initial.encounter" class="org.openmrs.module.kenyacore.form.FormDescriptor">
+        <property name="targetUuid" value="102246ff-04ac-4317-b58f-e0d82fd9afd9" />
+        <property name="apps">
+            <set>
+                <ref bean="kenyaemr.app.registration" />
+                <ref bean="kenyaemr.app.clinician" />
+                <ref bean="kenyaemr.app.chart" />
+                <ref bean="kenyaemr.app.intake" />
+                <ref bean="covid.app.providerHome"/>
+            </set>
+        </property>
+        <property name="showIfCalculation" value="org.openmrs.module.covid19.calculation.library.covid.EligibleForCovidScreeningWorkflowCalculation"/>
+        <property name="icon" value="kenyaui:forms/generic.png" />
+        <property name="htmlform" value="covid19:diabetesNhypertensionInitialEncounter.html" />
+        <property name="order" value="201005" />
+    </bean>
+
+    <bean id="kenyaemr.ncd.followup.encounter" class="org.openmrs.module.kenyacore.form.FormDescriptor">
+        <property name="targetUuid" value="5a2aa5b9-f6d3-4127-a65c-0d9dcfe2bd31" />
+        <property name="apps">
+            <set>
+                <ref bean="kenyaemr.app.registration" />
+                <ref bean="kenyaemr.app.clinician" />
+                <ref bean="kenyaemr.app.chart" />
+                <ref bean="kenyaemr.app.intake" />
+                <ref bean="covid.app.providerHome"/>
+            </set>
+        </property>
+        <property name="showIfCalculation" value="org.openmrs.module.covid19.calculation.library.covid.EligibleForCovidScreeningWorkflowCalculation"/>
+        <property name="icon" value="kenyaui:forms/generic.png" />
+        <property name="htmlform" value="covid19:diabetesNhypertensionFollowupEncounter.html" />
+        <property name="order" value="201005" />
+    </bean>
     <!-- end of egpaf forms-->
 
     <!--Reports-->
