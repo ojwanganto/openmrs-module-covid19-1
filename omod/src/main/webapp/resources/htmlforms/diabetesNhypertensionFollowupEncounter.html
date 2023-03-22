@@ -112,22 +112,9 @@
                 <tr>
                     <td>Type of visit</td>
                     <td>
-                        <obs conceptId="1169AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
-                             answerConceptIds="703AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,664AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1067AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1069AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                        <obs conceptId="164181AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="163293AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1648AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1246AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,160101AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="radio" answerLabels="Sick,Referred,Scheduled,Unscheduled" required="true"/>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Chief complaint</td>
-                    <td>
-                        <obs conceptId="1917AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
-                             answerLabels="Yes,No" required="true" style="yes_no" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>Notes</td>
-                    <td>
-                        <obs id ="obs-specify-symptoms" conceptId="160632AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"  rows="4" cols="60" style="textarea"/>
                     </td>
                 </tr>
             </table>
@@ -157,7 +144,7 @@
                 </td>
 			</tr>
             <tr id="referringFacilityRow">
-                <td>If yes, specify referring facility</td>
+                <td>Referring facility</td>
                 <td>
                     <obs conceptId="159371AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                          answerConceptIds="1555AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,159372AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,167050AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,160542AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,160473AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
@@ -228,7 +215,7 @@
                 <tr>
                     <td>Notes</td>
                     <td>
-                        <obs id ="complaints-notes" conceptId="160632AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" rows="3" cols="60"  style="textarea"/>
+                        <obs id ="complaints-notes" conceptId="160531AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"  rows="4" cols="60" style="textarea"/>
                     </td>
                 </tr>
             </table>
@@ -485,9 +472,7 @@
                     <td>
                         <obs conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
                              answerConceptId="142452AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel="Yes" required="true"/>
-                    </td>
-                    <td>
+                             style="checkbox" answerLabel=""/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         <obs conceptId="166879AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
                              answerConceptId="166674AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="checkbox" answerLabel="High Risk"/>
@@ -496,14 +481,15 @@
                              answerConceptId="166675AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="checkbox" answerLabel="Low Risk"/>
                     </td>
+
                     <td></td>
                 </tr>
                 <tr>
                     <td>Other</td>
                     <td>
                         <obs conceptId="162619AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
-                             answerConceptIds="166675AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Yes,No" required="true"/>
+                             answerConceptId="5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel=""/>
                     </td>
                 </tr>
             </table>
