@@ -30,6 +30,7 @@
             jq('#stopped-smoking').hide()
             jq('#stopped-alcohol').hide()
             jq('#referral-reason').hide()
+            jq('#diabetic-foot-risk').hide()
 
 
             jq("#diabetic-patient :input[type=radio]").change(showDiabetisType);
@@ -40,6 +41,7 @@
             jq('#drinking :input[type=radio]').change(showDurationSinceDrinkingStopped);
             jq('#transfer-out :input[type=radio]').change(showReferralReason);
             jq('#insurance-type :input[type=radio]').change(handleNhifNumber);
+            jq('#diabetic-foot :input[type=radio]').change(handleDiabeticFootRisk);
         });
 
         var showReferringFacility = function () {
@@ -107,15 +109,19 @@
         var showDurationSinceSmokingStopped = function () {
 
             var val = jq(this).val();
+            var drinksAlcohol = jq('#drinking input[type="radio"]:checked').val();
+
             if (val == 158939) { // stopped smoking
                 jq('#stopped-smoking').show()
-                jq('#cessation-counseling').hide();
-                clearHiddenSections([jq('#cessation-counseling')]);
-            } else if (val == 1065) { // currently smoking
+            } else if (val == 1065 || val == 1066) { // currently/never smoking
                 jq('#stopped-smoking').hide();
+                jq('#stopped-smoking input[type=text]').val("");
+
+            }
+
+            if (val == 1065 || drinksAlcohol == 1065) {
                 jq('#cessation-counseling').show();
-            } else if (val == 1066) { // not smoking
-                jq('#stopped-smoking').hide();
+            } else {
                 jq('#cessation-counseling').hide();
                 clearHiddenSections([jq('#cessation-counseling')]);
             }
@@ -124,15 +130,18 @@
         var showDurationSinceDrinkingStopped = function () {
 
             var val = jq(this).val();
+            var smokes = jq('#drinking input[type="radio"]:checked').val();
+
             if (val == 159452) { // stopped drinking
                 jq('#stopped-alcohol').show()
-                jq('#cessation-counseling').hide();
-                clearHiddenSections([jq('#cessation-counseling')]);
-            } else if (val == 1065) { // currently drinking
+            } else if (val == 1065 || val == 1066) { // currently/never drinks
                 jq('#stopped-alcohol').hide();
+                jq('#stopped-alcohol input[type=text]').val("");
+            }
+
+            if (val == 1065 || smokes == 1065) {
                 jq('#cessation-counseling').show();
-            } else if (val == 1066) { // not drinking
-                jq('#stopped-alcohol').hide();
+            } else {
                 jq('#cessation-counseling').hide();
                 clearHiddenSections([jq('#cessation-counseling')]);
             }
@@ -148,6 +157,16 @@
             }
         }
 
+        var handleDiabeticFootRisk = function () {
+            var val = jq(this).val();
+
+            if (val == 142452) {
+                jq('#diabetic-foot-risk').hide();
+                clearHiddenSections([jq('#diabetic-foot-risk')]);
+            } else {
+                jq('#diabetic-foot-risk').show();
+            }
+        }
         beforeSubmit.push(function () {
             //Before submit validations
             pAge = parseInt('<lookup expression="patient.age"/>');
@@ -180,6 +199,7 @@
                 var insuranceType = getValue('insurance-type.value');
                 var currentlySmoking = getValue('smoking.value');
                 var currentlyDrinking = getValue('drinking.value');
+                var hasDiabeticFoot = getValue('diabetic-foot.value');
 
                 if (hivStatus == 703){
                     jq('#enrolledInCare').show();
@@ -205,6 +225,20 @@
                     jq('#cessation-counseling').show();
                 } else {
                     jq('#cessation-counseling').hide();
+                }
+
+                if (currentlyDrinking == 159452) { // stopped drinking
+                    jq('#stopped-alcohol').show()
+                }
+
+                if (currentlySmoking == 158939) { // stopped smoking
+                    jq('#stopped-smoking').show()
+                }
+
+                if (hasDiabeticFoot == 142452) {
+                    jq('#diabetic-foot-risk').hide()
+                } else {
+                    jq('#diabetic-foot-risk').show();
                 }
             });
         </script>
@@ -532,7 +566,7 @@
                                  answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,158939AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                                  style="radio" answerLabels="Yes,No,Stopped" required="true"/>
                         </td>
-                        <td id="stopped-smoking">If stopped, date stopped?   <obs conceptId="1191AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/></td>
+                        <td id="stopped-smoking">If stopped, date stopped?   <obs conceptId="1191AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" allowFutureDates="false"/></td>
                     </tr>
                 </obsgroup>
                 <obsgroup groupingConceptId="121712AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
@@ -543,7 +577,7 @@
                                  answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,159452AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                                  style="radio" answerLabels="Yes,No,Stopped" required="true"/>
                         </td>
-                        <td id="stopped-alcohol">If stopped how long?   <obs conceptId="1191AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/></td>
+                        <td id="stopped-alcohol">If stopped, date stopped?   <obs conceptId="1191AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" allowFutureDates="false"/></td>
                     </tr>
                 </obsgroup>
                 <tr id="cessation-counseling">
@@ -688,7 +722,7 @@
                              answerConceptIds="1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1116AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="radio" answerLabels="Normal,Abnormal" required="true"/>
                     </td>
-                    <td>
+                    <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         <obs conceptId="163046AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText="Describe" cols="20"/>
                     </td>
                 </tr>
@@ -699,7 +733,7 @@
                              answerConceptIds="1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1116AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="radio" answerLabels="Normal,Abnormal" required="true"/>
                     </td>
-                    <td>
+                    <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         <obs conceptId="160689AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText="Describe" cols="20"/>
                     </td>
                 </tr>
@@ -710,7 +744,7 @@
                              answerConceptIds="1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1116AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="radio" answerLabels="Normal,Abnormal" required="true"/>
                     </td>
-                    <td>
+                    <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         <obs conceptId="160947AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText="Describe" cols="20"/>
                     </td>
                 </tr>
@@ -721,10 +755,13 @@
                              answerConceptIds="1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1116AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="radio" answerLabels="Normal,Abnormal" required="true"/>
                     </td>
-                    <td>
+                    <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         <obs conceptId="163109AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText="Describe" cols="20"/>
                     </td>
                 </tr>
+                <tr></tr>
+            </table>
+            <table>
                 <tr>
                     <td>Oral exam</td>
                     <td>
@@ -736,6 +773,7 @@
                              style="checkbox" answerLabel="Oral lesions"/>
                     </td>
                 </tr>
+                <tr></tr>
                 <tr>
                     <td>Mental health</td>
                     <td>
@@ -750,6 +788,7 @@
                              style="checkbox" answerLabel="Substance abuse"/>
                     </td>
                 </tr>
+                <tr></tr>
                 <tr>
                     <td>Foot exam</td>
                     <td>
@@ -764,13 +803,19 @@
                              style="checkbox" answerLabel="Deformity"/>
                     </td>
                 </tr>
+                <tr></tr>
                 <tr>
                     <td>Diabetic foot</td>
                     <td>
-                        <obs conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
-                             answerConceptId="142452AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel=""/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
+                        <obs id="diabetic-foot" conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="142452AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="radio" answerLabels="Yes,No"/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    </td>
+                    <td></td>
+                </tr>
+                <tr id="diabetic-foot-risk">
+                    <td>Diabetic foot risk</td>
+                    <td>
                         <obs conceptId="166879AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
                              answerConceptId="166674AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="checkbox" answerLabel="High Risk"/>
@@ -867,8 +912,199 @@
                              answerConceptId="167323AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="checkbox" answerLabel="Stress Management"/>
                     </td>
+                    <td>
+                        <obs class="lifestyle-management" conceptId="166937AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="161011AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Nutrition counseling and education"/>
+                    </td>
                 </tr>
             </table>
+        </fieldset>
+        <fieldset>
+            <legend>Nutrition plan</legend>
+            <table>
+                <tr>
+                    <td>Nutrition assessment <br/>
+                        (Anthropometric, Biochemical, diet history)</td>
+                    <td>
+                        <obs class="lifestyle-management" conceptId="161011AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" rows="5" cols="40"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Meal planning <br/>
+                        <div>• Calculation of caloric intake for
+                            patient done based on nutrition assessment</div>
+                        <div>• Distribution of nutrients as done as
+                            per recommendations</div>
+                    </td>
+                    <td>
+                        <obs class="lifestyle-management" conceptId="163189AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" rows="5" cols="40"/>
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+        <fieldset>
+            <legend>Current medication</legend>
+            <fieldset>
+                <legend>Glucose lowering drugs</legend>
+                <table>
+                    <obsgroup groupingConceptId="159460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                        <tr>
+                            <td colspan="2">
+                                <obs class="current-drugs"
+                                     conceptId="1193AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                     answerConceptId="1107AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                     style="checkbox" answerLabel="None"/>
+                            </td>
+                        </tr>
+                    </obsgroup>
+                    <obsgroup groupingConceptId="159460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                        <tr>
+                            <td>
+                                <obs class="current-drugs"
+                                     conceptId="1193AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                     answerConceptId="79651AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                     style="checkbox" answerLabel="Metformin"/>
+                            </td>
+                        </tr>
+                    </obsgroup>
+
+                    <obsgroup groupingConceptId="159460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                        <tr>
+                            <td>
+                                <obs class="current-drugs"
+                                     conceptId="1193AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                     answerConceptId="77071AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                     style="checkbox" answerLabel="Glibenclamide"/>
+                            </td>
+                        </tr>
+                    </obsgroup>
+
+                    <obsgroup groupingConceptId="159460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                        <tr>
+                            <td>
+                                <obs class="current-drugs"
+                                     conceptId="1193AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                     answerConceptId="78056AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                     style="checkbox" answerLabel="Insulin"/>
+                            </td>
+                        </tr>
+                    </obsgroup>
+
+                    <obsgroup groupingConceptId="159460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                        <tr>
+                            <td>
+                                <obs class="current-drugs"
+                                     conceptId="1193AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                     answerConceptId="78068AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                     style="checkbox" answerLabel="NPH"/>
+                            </td>
+                        </tr>
+                    </obsgroup>
+
+                    <obsgroup groupingConceptId="159460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                        <tr>
+                            <td>
+                                <obs class="current-drugs"
+                                     conceptId="1193AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                     answerConceptId="282AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                     style="checkbox" answerLabel="Soluble insulin"/>
+                            </td>
+                        </tr>
+                    </obsgroup>
+
+                    <obsgroup groupingConceptId="159460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                        <tr>
+                            <td colspan="2">
+                                <obs class="current-drugs"
+                                     conceptId="1193AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                     answerConceptId="5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                     style="checkbox" answerLabel="Other"/>
+                            </td>
+                        </tr>
+                    </obsgroup>
+                </table>
+            </fieldset>
+            <fieldset>
+                <legend>Anti hypertensive agents</legend>
+                <table>
+                    <obsgroup groupingConceptId="117399AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                        <tr>
+                            <td colspan="2">
+                                <obs class="current-drugs"
+                                     conceptId="1193AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                     answerConceptId="1107AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                     style="checkbox" answerLabel="None"/>
+                            </td>
+                        </tr>
+                    </obsgroup>
+                    <obsgroup groupingConceptId="117399AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                        <tr>
+                            <td>
+                                <obs class="current-drugs"
+                                     conceptId="1193AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                     answerConceptId="75633AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                     style="checkbox" answerLabel="Enalapril"/>
+                            </td>
+                        </tr>
+                    </obsgroup>
+
+                    <obsgroup groupingConceptId="117399AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                        <tr>
+                            <td>
+                                <obs class="current-drugs"
+                                     conceptId="1193AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                     answerConceptId="77696AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                     style="checkbox" answerLabel="HCTZ"/>
+                            </td>
+                        </tr>
+                    </obsgroup>
+
+                    <obsgroup groupingConceptId="117399AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                        <tr>
+                            <td>
+                                <obs class="current-drugs"
+                                     conceptId="1193AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                     answerConceptId="79074AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                     style="checkbox" answerLabel="Losartan"/>
+                            </td>
+                        </tr>
+                    </obsgroup>
+
+                    <obsgroup groupingConceptId="117399AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                        <tr>
+                            <td>
+                                <obs class="current-drugs"
+                                     conceptId="1193AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                     answerConceptId="80637AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                     style="checkbox" answerLabel="Nifedipine"/>
+                            </td>
+                        </tr>
+                    </obsgroup>
+
+                    <obsgroup groupingConceptId="117399AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                        <tr>
+                            <td>
+                                <obs class="current-drugs"
+                                     conceptId="1193AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                     answerConceptId="71652AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                     style="checkbox" answerLabel="Atenolol"/>
+                            </td>
+                        </tr>
+                    </obsgroup>
+
+                    <obsgroup groupingConceptId="117399AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                        <tr>
+                            <td colspan="2">
+                                <obs class="current-drugs"
+                                     conceptId="1193AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                     answerConceptId="5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                     style="checkbox" answerLabel="Other"/>
+                            </td>
+                        </tr>
+                    </obsgroup>
+                </table>
+            </fieldset>
         </fieldset>
         <fieldset>
             <legend>Treatment</legend>
