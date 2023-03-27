@@ -17,25 +17,69 @@
     <script type="text/javascript" src="../moduleResources/kenyaemr/scripts/moment.js"></script>
     <script type="text/javascript">
 
-            
-		jQuery(document).ready(function(){
 
-            jq('#tb-test-ordered').hide();
-            jq('#tb-results').hide();
-            jq('#referringFacilityRow').css('display','none');
+        jQuery(document).ready(function () {
 
+            jq('#diabetesType').hide();
+            jq('#nhif-number').hide();
+            jq('#enrolledInCare').hide();
+            jq('.external-referral').css('display','none');
+            jq('.internal-referral').css('display','none');
+            jq('#tb-test-ordered').hide()
+            jq('#tb-results').hide()
+            jq('#stopped-smoking').hide()
+            jq('#stopped-alcohol').hide()
+            jq('#referral-reason').hide()
+            jq('#diabetic-foot-risk-assessment').hide()
+            jq('#diabetic-foot-risk').hide()
+            jq('#nutrition-notes').hide()
+
+
+            jq("#diabetic-patient :input[type=radio]").change(showDiabetisType);
+            jq("#hiv-status :input[type=radio]").change(showHivEnrollmentSection);
             jq('#patientReferral :input[type=radio]').change(showReferringFacility);
             jq('#hasTbFeatures :input[type=radio]').change(showTBScreeningSections);
-
-		});
+            jq('#smoking :input[type=radio]').change(showDurationSinceSmokingStopped);
+            jq('#drinking :input[type=radio]').change(showDurationSinceDrinkingStopped);
+            jq('#transfer-out :input[type=radio]').change(showReferralReason);
+            jq('#insurance-type :input[type=radio]').change(handleNhifNumber);
+            jq('#diabetic-foot :input[type=radio]').change(handleDiabeticFootRisk);
+            jq('.lifestyle-management :input[type=checkbox]').change(showNutritionNotes);
+        });
 
         var showReferringFacility = function () {
 
             var ans = getValue('patientReferral.value');
             if (ans == "true") {
-                jq('#referringFacilityRow').show();
+                jq('.internal-referral').show();
+                jq('.external-referral').hide();
+                clearHiddenSections([jq('.external-referral')]);
             } else {
-                jq('#referringFacilityRow').hide();
+                jq('.internal-referral').hide();
+                jq('.external-referral').show();
+                clearHiddenSections([jq('.internal-referral')]);
+            }
+        }
+
+        var showDiabetisType = function () {
+
+            var val = jq(this).val();
+            if (val == 1065 || val == 1066) {
+                jq('#diabetesType').show();
+            } else {
+                clearHiddenSections([jq('#diabetesType')]);
+                jq('#diabetesType').hide();
+            }
+        }
+
+        var showHivEnrollmentSection = function () {
+
+            var val = jq(this).val();
+            if (val == 703) {
+                jq('#enrolledInCare').show();
+            } else {
+                clearHiddenSections([jq('#enrolledInCare')]);
+                jq('#enrolledInCare').hide();
             }
         }
 
@@ -51,6 +95,99 @@
                 jq('#tb-test-ordered').hide()
                 jq('#tb-results').hide()
             }
+        }
+
+        var showReferralReason = function () {
+            var val = jq(this).val();
+            if (val == 1065) {
+                jq('#referral-reason').show();
+            } else {
+                clearHiddenSections([jq('#referral-reason')]);
+                jq('#referral-reason').hide();
+                clearHiddenSections([jq('#referral-reason')]);
+
+            }
+        }
+
+        var showDurationSinceSmokingStopped = function () {
+
+            var val = jq(this).val();
+            var drinksAlcohol = jq('#drinking input[type="radio"]:checked').val();
+
+            if (val == 158939) { // stopped smoking
+                jq('#stopped-smoking').show()
+            } else if (val == 1065 || val == 1066) { // currently/never smoking
+                jq('#stopped-smoking').hide();
+                jq('#stopped-smoking input[type=text]').val("");
+
+            }
+
+            if (val == 1065 || drinksAlcohol == 1065) {
+                jq('#cessation-counseling').show();
+            } else {
+                jq('#cessation-counseling').hide();
+                clearHiddenSections([jq('#cessation-counseling')]);
+            }
+        }
+
+        var showDurationSinceDrinkingStopped = function () {
+
+            var val = jq(this).val();
+            var smokes = jq('#drinking input[type="radio"]:checked').val();
+
+            if (val == 159452) { // stopped drinking
+                jq('#stopped-alcohol').show()
+            } else if (val == 1065 || val == 1066) { // currently/never drinks
+                jq('#stopped-alcohol').hide();
+                jq('#stopped-alcohol input[type=text]').val("");
+            }
+
+            if (val == 1065 || smokes == 1065) {
+                jq('#cessation-counseling').show();
+            } else {
+                jq('#cessation-counseling').hide();
+                clearHiddenSections([jq('#cessation-counseling')]);
+            }
+        }
+
+        var handleNhifNumber = function () {
+            var insuranceType = jq(this).val();
+            if (insuranceType == 1917) {
+                jq('#nhif-number').show();
+            } else {
+                jq('#nhif-number').hide();
+                clearHiddenSections([jq('#nhif-number')]);
+            }
+        }
+
+        var handleDiabeticFootRisk = function () {
+            var val = jq(this).val();
+
+            if (val == 142452) {
+                jq('#diabetic-foot-risk-assessment').hide();
+                clearHiddenSections([jq('#diabetic-foot-risk-assessment')]);
+            } else {
+                jq('#diabetic-foot-risk-assessment').show();
+            }
+        }
+
+        var showNutritionNotes = function () {
+            var checkedOptions = jq('.lifestyle-management :input[type=checkbox]:checked');
+            var nutritionSelected = false;
+            checkedOptions.each(function (){
+                var val = jq(this).val();
+                if (val == 1380) {
+                    nutritionSelected = true;
+                    return false;
+                }
+            });
+
+            if (nutritionSelected) {
+                jq('#nutrition-notes').show();
+            } else {
+                jq('#nutrition-notes').hide();
+            }
+
         }
 
         beforeSubmit.push(function() {
@@ -76,12 +213,57 @@
             }
         }
     </script>
-     
-     <ifMode mode="EDIT">
-        <script type="text/javascript">
-            jq(document).ready(function(){
 
-		});
+    <ifMode mode="EDIT">
+        <script type="text/javascript">
+            jq(document).ready(function () {
+                var hivStatus = getValue('hiv-status.value');
+                var referredPatient = getValue('patientReferral.value');
+                var insuranceType = getValue('insurance-type.value');
+                var currentlySmoking = getValue('smoking.value');
+                var currentlyDrinking = getValue('drinking.value');
+                var hasDiabeticFoot = getValue('diabetic-foot.value');
+
+                if (hivStatus == 703){
+                    jq('#enrolledInCare').show();
+                } else{
+                    jq('#enrolledInCare').hide();
+                }
+
+                if (referredPatient == "true") {
+                    jq('.internal-referral').show();
+                    jq('.external-referral').hide();
+                } else {
+                    jq('.internal-referral').hide();
+                    jq('.external-referral').show();
+                }
+
+                if (insuranceType == 1917) {
+                    jq('#nhif-number').show();
+                } else {
+                    jq('#nhif-number').hide();
+                }
+
+                if (currentlySmoking == 1065 || currentlyDrinking == 1065) {
+                    jq('#cessation-counseling').show();
+                } else {
+                    jq('#cessation-counseling').hide();
+                }
+
+                if (currentlyDrinking == 159452) { // stopped drinking
+                    jq('#stopped-alcohol').show()
+                }
+
+                if (currentlySmoking == 158939) { // stopped smoking
+                    jq('#stopped-smoking').show()
+                }
+
+                if (hasDiabeticFoot == 142452) {
+                    jq('#diabetic-foot-risk').hide()
+                } else {
+                    jq('#diabetic-foot-risk').show();
+                }
+            });
         </script>
     </ifMode>
 
@@ -113,8 +295,8 @@
                     <td>Type of visit</td>
                     <td>
                         <obs conceptId="164181AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
-                             answerConceptIds="163293AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1648AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1246AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,160101AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Sick,Referred,Scheduled,Unscheduled" required="true"/>
+                             answerConceptIds="163293AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1246AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,160101AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="radio" answerLabels="Sick,Scheduled,Unscheduled" required="true"/>
                     </td>
                 </tr>
             </table>
@@ -123,109 +305,76 @@
             <legend>NHIF Coverage</legend>
             <table>
                 <tr>
-                    <td>Patient covered by NHIF</td>
+                    <td>Patient insurance cover</td>
                     <td>
-                        <obs conceptId="1917AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
-                             answerLabels="Yes,No" required="true" style="yes_no" />
+                        <obs id="insurance-type" conceptId="159356AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="1917AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1107AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             answerLabels="NHIF,Other,None" required="true" style="radio"/>
+                    </td>
+                    <td id="nhif-number">
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NHIF Number: <span><patient field="identifier" required="false" identifierTypeId="09ebf4f9-b673-4d97-b39b-04f94088ba64" /></span>
                     </td>
                 </tr>
             </table>
         </fieldset>
-        <fieldset>
-            <legend>Referral Status</legend>
 
-            <table>
-			<tr>
-				<td>Is patient a referral?</td>
-                <td>
-                    <obs id="patientReferral" conceptId="1648AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                            answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                            answerLabel="Yes,No" style="yes_no" required="true"/>
-                </td>
-			</tr>
-            <tr id="referringFacilityRow">
-                <td>Referring facility</td>
-                <td>
-                    <obs conceptId="159371AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                         answerConceptIds="1555AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,159372AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,167050AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,160542AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,160473AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                         answerLabels="CHW,Dispensary,Inpatient,OPD,Casualty,Other" style="radio" required="true"/>
-                </td>
-            </tr>
-		</table>
-        </fieldset>
-        <fieldset>
+        <fieldset id="patient-symptoms">
             <legend>Chief Complaints</legend>
             <table>
                 <tr>
                     <td>
-                        <obs class="patient-symptom" conceptId="5219AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
-                             answerConceptId="141600AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel="Shortness of breath on activity"/>
-                    </td>
-                    <td>
-                    <obs class="patient-symptom" conceptId="5219AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
-                         answerConceptId="130987AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                         style="checkbox" answerLabel="Palpitations (Heart racing)"/>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <obs class="patient-symptom" conceptId="5219AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
-                             answerConceptId="156046AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel="Recurrent dizziness"/>
-                    </td>
-                    <td>
-                        <obs class="patient-symptom" conceptId="5219AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
-                             answerConceptId="112961AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel="Fainting"/>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <obs class="patient-symptom" conceptId="5219AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
-                             answerConceptId="135966AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel="Leg swelling"/>
-                    </td>
-                    <td>
-                        <obs class="patient-symptom" conceptId="5219AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
-                             answerConceptId="135592AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel="Loss of consciousness"/>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <obs class="patient-symptom" conceptId="5219AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
-                             answerConceptId="147104AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel="Blurring of vision"/>
-                    </td>
-                    <td>
-                        <obs class="patient-symptom" conceptId="5219AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
-                             answerConceptId="6005AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel="Focal weakness"/>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <obs class="patient-symptom" conceptId="5219AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
-                             answerConceptId="116860AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel="Foot complaints"/>
-                    </td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Notes</td>
-                    <td>
-                        <obs id ="complaints-notes" conceptId="160531AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"  rows="4" cols="60" style="textarea"/>
+                        <obs id="obs-specify-symptoms" conceptId="160632AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="textarea" cols="60" rows="5"/>
                     </td>
                 </tr>
             </table>
         </fieldset>
-        <fieldset>
+
+        <fieldset id="tb-screening-tab">
             <legend>TB Screening</legend>
+            <table id="screening-questions">
+                <obsgroup groupingConceptId="160108AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+
+                    <tr>
+                        <td>Cough of any duration:  &#160;&#160; </td>
+                        <td><obs conceptId="1729AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" " answerConceptIds="159799AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" style="radio" answerLabels="Yes,No" id="tb-screening-error" /></td>
+                    </tr>
+                    <tr>
+                        <td>Fever: &#160;&#160;</td>
+                        <td><obs conceptId="1729AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" " answerConceptIds="1494AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" style="radio" answerLabels="Yes,No" /></td>
+
+                    </tr>
+                    <tr>
+                        <td>Noticeable weight loss or poor weight gain: &#160; </td>
+                        <td><obs conceptId="1729AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" " answerConceptIds="832AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" style="radio" answerLabels="Yes,No" /></td>
+                    </tr>
+                    <!--Adult Questions-->
+                    <includeIf velocityTest="$patient.age &gt; 15">
+                        <tr>
+                            <td>Night sweats: &#160;&#160;</td>
+                            <td><obs conceptId="1729AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" " answerConceptIds="133027AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" style="radio" answerLabels="Yes,No" /></td>
+                        </tr>
+                    </includeIf>
+                    <!--Paed Questions-->
+                    <includeIf velocityTest="$patient.age &lt; 16">
+                        <tr>
+                            <td>Contact with a TB Case: &#160;&#160;</td>
+                            <td><obs conceptId="1729AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" " answerConceptIds="124068AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" style="radio" answerLabels="Yes,No" /></td>
+                        </tr>
+                        <tr>
+                            <td>Lethergy, less playful than usual: &#160;&#160;</td>
+                            <td><obs conceptId="1729AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" " answerConceptIds="116334AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" style="radio" answerLabels="Yes,No" /></td>
+                        </tr>
+                    </includeIf>
+                </obsgroup>
+            </table>
+        </fieldset>
+        <fieldset>
+            <legend>TB Screening outcome</legend>
             <table>
                 <tr>
-                    <td>Any features of TB? Cough, Night sweats, weight loss, lymph nodes</td>
-                    <td>
+                    <td>Any features of TB? </td>
+                    <td colspan="3">
                         <obs id="hasTbFeatures" conceptId="164800AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
                              answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="radio" answerLabels="Yes,No" required="true"/>
@@ -277,25 +426,25 @@
                     <td>Drink alcohol</td>
                     <td>
                         <obs conceptId="159449AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
-                             answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,159452AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             answerConceptIds="159450AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1090AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,159452AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="radio" answerLabels="Yes,No,Stopped" required="true"/>
                     </td>
                 </tr>
                 <tr>
                     <td>Adequate physical activity</td>
                     <td>
-                        <obs conceptId="159449AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
-                             answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,159452AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Yes,No,Stopped" required="true"/>
+                        <obs conceptId="165569AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="radio" answerLabels="Yes,No" required="true"/>
                     </td>
                 </tr>
                 <tr>
                     <td>Healthy diet <br/>
                         <span style="font-style: italic;font-size: 14px">(low salt and fats, hight fruits and vegetable intake and unrefined carbohydrates)</span></td>
                     <td>
-                        <obs conceptId="159449AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
-                             answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,159452AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Yes,No,Stopped" required="true"/>
+                        <obs conceptId="167392AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="159596AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,142385AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="radio" answerLabels="Yes,No" required="true"/>
                     </td>
                 </tr>
             </table>
@@ -310,6 +459,10 @@
                              answerConceptIds="1175AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="radio" answerLabels="N/A,Yes,No" required="true"/>
                     </td>
+                    <td>
+                        <obs id="lmp-date" labelText="LMP"
+                             conceptId="1427AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+                    </td>
                 </tr>
             </table>
         </fieldset>
@@ -318,63 +471,152 @@
             <table>
                 <tr>
                     <td>
-                        <obs class="complications" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                        <obs class="complications" conceptId="1628AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
                              answerConceptId="111103AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="checkbox" answerLabel="Stroke"/>
                     </td>
                     <td>
-                        <obs class="complications" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                        <obs class="complications" conceptId="1628AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
                              answerConceptId="159298AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="checkbox" answerLabel="Visual Impairment"/>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <obs class="complications" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                        <obs class="complications" conceptId="1628AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
                              answerConceptId="139069AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="checkbox" answerLabel="Heart failure"/>
                     </td>
                     <td>
-                        <obs class="complications" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                        <obs class="complications" conceptId="1628AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
                              answerConceptId="163411AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="checkbox" answerLabel="Foot ulcers/deformities"/>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <obs class="complications" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                        <obs class="complications" conceptId="1628AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
                              answerConceptId="6033AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="checkbox" answerLabel="Renal disease"/>
                     </td>
                     <td>
-                        <obs class="complications" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                        <obs class="complications" conceptId="1628AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
                              answerConceptId="116123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="checkbox" answerLabel="Erectile dysfunction"/>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <obs class="complications" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                        <obs class="complications" conceptId="1628AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
                              answerConceptId="118983AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="checkbox" answerLabel="Peripheral Neuropathy"/>
                     </td>
                     <td>
-                        <obs class="complications" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                        <obs class="complications" conceptId="1628AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
                              answerConceptId="5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="checkbox" answerLabel="Others"/>
                     </td>
                 </tr>
             </table>
         </fieldset>
+        <fieldset class="vitals-part">
+            <legend>Vital Signs</legend>
+
+            <table cellspacing="5" style=" float: left; ">
+                <tr>
+                    <th>Vital signs</th>
+                    <th align="left">Current</th>
+                    <th align="left">Recent</th>
+                </tr>
+                <tr class="patient-details">
+                    <td>Temp</td>
+                    <td>
+                        <obs conceptId="5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" id="temp"/> &#176;C
+                    </td>
+                    <td>
+                        <span class="value"><recentObs conceptId="5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/></span>
+                    </td>
+                </tr>
+                <tr class="patient-details">
+                    <td>Pulse Rate</td>
+                    <td>
+                        <obs conceptId="5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" id="pulse"/>
+                    </td>
+                    <td><span class="value"><recentObs conceptId="5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/></span></td>
+                </tr>
+                <tr class="patient-details">
+                    <td>BP</td>
+                    <td>
+                        <obs conceptId="5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" id="systolic"/>
+                        /
+                        <obs conceptId="5086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" id="diastolic"/>
+                        mmHg
+                    </td>
+                    <td><span class="value"><recentObs conceptId="5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/> / <recentObs
+                            conceptId="5086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/></span></td>
+                </tr>
+                <tr class="patient-details">
+                    <td>Respiratory Rate</td>
+                    <td>
+                        <obs conceptId="5242AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" id="resp"/>
+                    </td>
+                    <td><span class="value"><recentObs conceptId="5242AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/></span></td>
+                </tr>
+                <tr class="patient-details">
+                    <td>Oxygen Saturation</td>
+                    <td>
+                        <obs conceptId="5092AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" id="oxygen"/>
+                    </td>
+                    <td><span class="value"><recentObs conceptId="5092AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/></span></td>
+                </tr>
+            </table>
+            <table cellspacing="5" style="display: inline-block; ">
+
+                <tr>
+                    <th>Other Recordings</th>
+                    <th align="left">Current</th>
+                    <th align="left">Recent</th>
+                    <th align="left"></th>
+                </tr>
+                <tr class="patient-details">
+                    <td>Weight</td>
+                    <td>
+                        <obs id="weight" conceptId="5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+                        kg
+                        <span style="color:red;"><strong>*</strong></span>
+                    </td>
+                    <td><span class="value"><recentObs conceptId="5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/></span></td>
+                    <td rowspan="4">
+                    </td>
+                </tr>
+                <tr class="patient-details">
+                    <td>Height</td>
+                    <td>
+                        <obs id="height" conceptId="5090AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+                        cm
+                        <span style="color:red;"><strong>*</strong></span>
+                    </td>
+                    <td><span class="value"><recentObs conceptId="5090AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/></span></td>
+                </tr>
+                <includeIf velocityTest="$patient.age &gt; 14">
+                    <tr class="patient-details">
+                        <td>BMI</td>
+                        <td><span id="calculated-bmi" class="value"></span></td>
+                        <td><span id="recent-calculated-bmi" class="value"></span></td>
+                    </tr>
+                </includeIf>
+                <tr class="patient-details">
+                    <td>MUAC</td>
+                    <td>
+                        <obs conceptId="1343AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" id="muac"/>
+                    </td>
+                    <td><span class="value"><recentObs conceptId="1343AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/></span></td>
+                </tr>
+            </table>
+        </fieldset>
         <fieldset>
             <legend>Physical examination</legend>
             <table>
-                <tr>
-                    <td>Vital signs</td>
-                    <td>
-
-                    </td>
-                </tr>
                 <tr>
                     <td>General exam</td>
                     <td>
@@ -399,24 +641,17 @@
                              style="checkbox" answerLabel="Other"/>
                     </td>
                 </tr>
-                <tr>
-                    <td></td>
-                    <td>
-                        <obs conceptId="1119AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             answerConceptId="460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel="Edema"/>&nbsp;&nbsp;&nbsp;
-
-                        <obs conceptId="1119AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             answerConceptId="5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel="Other"/>
-                    </td>
-                </tr>
+            </table>
+            <table>
                 <tr>
                     <td>Cardiovascular</td>
                     <td>
                         <obs conceptId="1124AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
                              answerConceptIds="1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1116AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="radio" answerLabels="Normal,Abnormal" required="true"/>
+                    </td>
+                    <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <obs conceptId="163046AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText="Describe" cols="20"/>
                     </td>
                 </tr>
                 <tr>
@@ -426,6 +661,9 @@
                              answerConceptIds="1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1116AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="radio" answerLabels="Normal,Abnormal" required="true"/>
                     </td>
+                    <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <obs conceptId="160689AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText="Describe" cols="20"/>
+                    </td>
                 </tr>
                 <tr>
                     <td>Abdominal pelvic</td>
@@ -433,6 +671,9 @@
                         <obs conceptId="1125AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
                              answerConceptIds="1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1116AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="radio" answerLabels="Normal,Abnormal" required="true"/>
+                    </td>
+                    <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <obs conceptId="160947AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText="Describe" cols="20"/>
                     </td>
                 </tr>
                 <tr>
@@ -442,7 +683,13 @@
                              answerConceptIds="1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1116AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="radio" answerLabels="Normal,Abnormal" required="true"/>
                     </td>
+                    <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <obs conceptId="163109AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText="Describe" cols="20"/>
+                    </td>
                 </tr>
+                <tr></tr>
+            </table>
+            <table>
                 <tr>
                     <td>Oral exam</td>
                     <td>
@@ -450,101 +697,195 @@
                              answerConceptIds="1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1116AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="radio" answerLabels="Normal,Abnormal" required="true"/>
                     </td>
-                </tr>
-                <tr>
-                    <td>Mental health</td>
-                    <td>
-                        <obs conceptId="163043AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
-                             answerConceptIds="1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1116AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Normal,Abnormal" required="true"/>
-                    </td>
+
                 </tr>
                 <tr>
                     <td>Foot exam</td>
                     <td>
                         <obs conceptId="165471AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
-                             answerConceptIds="1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1116AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Normal,Abnormal" required="true"/>
+                             answerConceptId="155388AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Calluses"/>
+                        <obs conceptId="165471AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptId="163411AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Ulcers"/>
+                        <obs conceptId="165471AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptId="142677AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Deformity"/>
                     </td>
                 </tr>
+                <tr></tr>
                 <tr>
                     <td>Diabetic foot</td>
                     <td>
-                        <obs conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
-                             answerConceptId="142452AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel=""/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        <obs conceptId="166879AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
-                             answerConceptId="166674AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel="High Risk"/>
-                        &nbsp;&nbsp;&nbsp;
-                        <obs conceptId="162619AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
-                             answerConceptId="166675AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel="Low Risk"/>
+                        <obs id="diabetic-foot" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="142452AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="radio" answerLabels="Yes,No"/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     </td>
-
+                    <td></td>
+                </tr>
+                <tr id="diabetic-foot-risk-assessment">
+                    <td>Foot Risk assessment</td>
+                    <td>
+                        <obs class="diabetic-foot" conceptId="165430AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptId="5135AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Loss of sensation"/>
+                        <obs class="diabetic-foot" conceptId="165430AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptId="150518AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Absent pulses"/>
+                        <obs class="diabetic-foot" conceptId="165430AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptId="142677AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Foot deformity"/>
+                        <obs class="diabetic-foot" conceptId="165430AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptId="163411AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="History of ulcer"/>
+                        <obs class="diabetic-foot" conceptId="165430AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptId="164009AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Prior amputation"/>&nbsp;
+                    </td>
+                    <td></td>
+                </tr>
+                <tr id="diabetic-foot-risk">
+                    <td>Diabetic foot risk</td>
+                    <td>
+                        <obs conceptId="166879AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="166675AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,166674AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="radio" answerLabels="Low Risk,High Risk"/>
+                    </td>
                     <td></td>
                 </tr>
                 <tr>
                     <td>Other</td>
                     <td>
-                        <obs conceptId="162619AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                        <obs conceptId="163042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" rows="5" cols="60"/>
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+        <fieldset>
+            <legend>New Onset Complications</legend>
+            <table>
+                <tr>
+                    <td>
+                        <obs class="complications" conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="111103AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Stroke"/>
+                    </td>
+                    <td>
+                        <obs class="complications" conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="159298AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Visual Impairment"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <obs class="complications" conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="139069AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Heart failure"/>
+                    </td>
+                    <td>
+                        <obs class="complications" conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="163411AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Foot ulcers/deformities"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <obs class="complications" conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="6033AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Renal disease"/>
+                    </td>
+                    <td>
+                        <obs class="complications" conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="116123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Erectile dysfunction"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <obs class="complications" conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="118983AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Peripheral Neuropathy"/>
+                    </td>
+                    <td>
+                        <obs class="complications" conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
                              answerConceptId="5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel=""/>
+                             style="checkbox" answerLabel="Others"/>
                     </td>
                 </tr>
             </table>
         </fieldset>
-        <fieldset>
-            <legend>Drugs</legend>
-            <table>
-                <tr>
-                    <td>
-
-                    </td>
-                    <td>
-
-                    </td>
-                </tr>
+        <fieldset class="patient-details">
+            <legend>Diagnosis</legend>
+            <table style="width: 70%;" border="0">
+                <repeat>
+                    <template>
+                        <obsgroup groupingConceptId="159947AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                            <tr>
+                                <td>
+                                    <obs conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" answerClasses="Diagnosis" id="diagnosis-type" style="autocomplete"/>
+                                </td>
+                            </tr>
+                        </obsgroup>
+                    </template>
+                    <render n="11" concept="Diagnosis"/>
+                    <render n="12" concept="Diagnosis"/>
+                    <render n="13" concept="Diagnosis"/>
+                    <render n="14" concept="Diagnosis"/>
+                    <render n="15" concept="Diagnosis"/>
+                </repeat>
             </table>
         </fieldset>
-        <fieldset>
-            <legend>Investigations</legend>
-            <table>
-                <tr>
-                    <td>Vital signs</td>
-                    <td>
-                        <obs conceptId="162619AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
-                             answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Yes,No" required="true"/>
-                    </td>
-                </tr>
-            </table>
-        </fieldset>
-
-
         <fieldset>
             <legend>Lifestyle Management</legend>
             <table>
                 <tr>
                     <td>
-                        <obs class="lifestyle-management" conceptId="166937AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
-                             answerConceptId="161595AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel="Diabetes and Hypertension Education"/>
+                        <obs class="lifestyle-management" conceptId="1379AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="159364AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Physical activities"/>
                     </td>
                     <td>
-                        <obs class="lifestyle-management" conceptId="166937AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
-                             answerConceptId="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel="Physical Activities"/>
+                        <obs class="lifestyle-management" conceptId="1379AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="5489AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Mental wellbeing"/>
                     </td>
                     <td>
-                        <obs class="lifestyle-management" conceptId="166937AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
-                             answerConceptId="978AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel="Self care management"/>
+                        <obs class="lifestyle-management" conceptId="1379AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="1455AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Alcohol and tobacco"/>
                     </td>
                     <td>
-                        <obs class="lifestyle-management" conceptId="166937AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
-                             answerConceptId="167323AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel="Stress Management"/>
+                        <obs class="lifestyle-management" conceptId="1379AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="5486AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Social group"/>
+                    </td>
+                    <td>
+                        <obs class="lifestyle-management" conceptId="1379AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                             answerConceptId="1380AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Nutrition"/>
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+        <fieldset id="nutrition-notes">
+            <legend>Nutrition plan</legend>
+            <table>
+                <tr>
+                    <td>Nutrition assessment <br/>
+                        (Anthropometric, Biochemical, diet history)</td>
+                    <td>
+                        <obs class="nutrition-management" conceptId="161011AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" rows="5" cols="40"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Meal planning <br/>
+                        <div>• Calculation of caloric intake for
+                            patient done based on nutrition assessment</div>
+                        <div>• Distribution of nutrients as done as
+                            per recommendations</div>
+                    </td>
+                    <td>
+                        <obs class="nutrition-management" conceptId="163189AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" rows="5" cols="40"/>
                     </td>
                 </tr>
             </table>
@@ -775,69 +1116,6 @@
         </fieldset>
 
         <fieldset>
-            <legend>Investigations</legend>
-            <table>
-                <tr>
-                    <td>
-                        <obs class="tests-offered" conceptId="1271AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
-                             answerConceptId="1107AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel="None"/>
-                    </td>
-                    <td>
-                        <obs class="tests-offered" conceptId="1271AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
-                             answerConceptId="302AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel="Urinalysis"/>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <obs class="tests-offered" conceptId="1271AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
-                             answerConceptId="159644AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel="HbA1c"/>
-                    </td>
-                    <td>
-                        <obs class="tests-offered" conceptId="1271AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
-                             answerConceptId="849AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel="Microalbumin"/>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <obs class="tests-offered" conceptId="1271AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
-                             answerConceptId="159830AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel="Creatinine"/>
-                    </td>
-                    <td>
-                        <obs class="tests-offered" conceptId="1271AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
-                             answerConceptId="82340AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel="Potassium"/>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <obs class="tests-offered" conceptId="1271AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
-                             answerConceptId="161157AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel="ECG"/>
-                    </td>
-                    <td>
-                        <obs class="tests-offered" conceptId="1271AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
-                             answerConceptId="160053AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel="Fasting lipid profile"/>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <obs class="tests-offered" conceptId="1271AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
-                             answerConceptId="5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel="Other"/>
-                    </td>
-                    <td>
-                    </td>
-                </tr>
-            </table>
-        </fieldset>
-
-        <fieldset>
             <legend>Follow up plan</legend>
             <table>
                     <tr>
@@ -845,7 +1123,7 @@
                             Next appointment date
                         </td>
                         <td>
-                            <obs conceptId="5096AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+                            <obs conceptId="5096AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" allowFutureDates="true"/>
                         </td>
                     </tr>
             </table>

@@ -31,6 +31,7 @@
             jq('#stopped-alcohol').hide()
             jq('#referral-reason').hide()
             jq('#diabetic-foot-risk').hide()
+            jq('#nutrition-notes').hide()
 
 
             jq("#diabetic-patient :input[type=radio]").change(showDiabetisType);
@@ -42,6 +43,7 @@
             jq('#transfer-out :input[type=radio]').change(showReferralReason);
             jq('#insurance-type :input[type=radio]').change(handleNhifNumber);
             jq('#diabetic-foot :input[type=radio]').change(handleDiabeticFootRisk);
+            jq('#lifestyle-management :input[type=radio]').change(showNutritionNotes);
         });
 
         var showReferringFacility = function () {
@@ -167,6 +169,17 @@
                 jq('#diabetic-foot-risk').show();
             }
         }
+
+        var showNutritionNotes = function () {
+            var val = jq(this).val();
+
+            if (val == 161011) {
+                jq('#nutrition-notes').show();
+            } else {
+                jq('#nutrition-notes').hide();
+            }
+        }
+
         beforeSubmit.push(function () {
             //Before submit validations
             pAge = parseInt('<lookup expression="patient.age"/>');
@@ -920,7 +933,7 @@
                 </tr>
             </table>
         </fieldset>
-        <fieldset>
+        <fieldset id="nutrition-notes">
             <legend>Nutrition plan</legend>
             <table>
                 <tr>
@@ -1415,7 +1428,7 @@
                             Next appointment date
                         </td>
                         <td>
-                            <obs conceptId="5096AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+                            <obs conceptId="5096AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" allowFutureDates="true"/>
                         </td>
                     </tr>
                     <tr>
