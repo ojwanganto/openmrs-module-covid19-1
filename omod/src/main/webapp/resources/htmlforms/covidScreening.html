@@ -112,6 +112,7 @@
         beforeSubmit.push(function() {
             //Before submit validations
             pAge = parseInt('<lookup expression="patient.age"/>');
+            pSex = '<lookup expression="patient.gender"/>';// velocityTest="$patient.gender == 'M'
             var encounterDate = getValue('encounter-date.value'); 
             var symptomsOnsetDate = getValue('date-onset-of-symptoms.value');
             var entryPoint = jq('#entry-point input[type="radio"]:checked').val();
@@ -160,7 +161,7 @@
                     return false;
                 }
 
-                if (typeof patientPregnant !=='undefined' &amp;&amp; typeof jq('#patient-pregnant input[type="radio"]:checked').val() !== 'undefined') {
+                if (pSex == 'F' &amp;&amp; typeof jq('#patient-pregnant input[type="radio"]:checked').val() === 'undefined') {
                     getField('patient-pregnant.error').html('Required').show();
                     return false;
                 }
