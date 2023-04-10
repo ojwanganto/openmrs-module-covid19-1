@@ -12,6 +12,7 @@ package org.openmrs.module.covid19.calculation.library.covid;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Encounter;
+import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.FormService;
@@ -25,7 +26,9 @@ import org.openmrs.module.kenyacore.calculation.BooleanResult;
 import org.openmrs.module.kenyacore.calculation.PatientFlagCalculation;
 import org.openmrs.module.kenyaemr.util.EmrUtils;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -40,6 +43,8 @@ public class ShowNCDFollowupFormCalculation extends AbstractPatientCalculation i
 	 */
 	protected static final Log log = LogFactory.getLog(NotVaccinatedCalculation.class);
 	
+	private String alertMessage;
+	
 	@Override
 	public CalculationResultMap evaluate(Collection<Integer> cohort, Map<String, Object> parameterValues,
 	        PatientCalculationContext context) {
@@ -47,7 +52,8 @@ public class ShowNCDFollowupFormCalculation extends AbstractPatientCalculation i
 		EncounterService encounterService = Context.getEncounterService();
 		FormService formService = Context.getFormService();
 		PatientService patientService = Context.getPatientService();
-		
+		String diabetesGroupingConcept = "140228AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+		String hypertensionGroupingConcept = "117399AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 		CalculationResultMap ret = new CalculationResultMap();
 		for (Integer ptId : cohort) {
 			Patient patient = patientService.getPatient(ptId);
@@ -58,6 +64,26 @@ public class ShowNCDFollowupFormCalculation extends AbstractPatientCalculation i
 			
 			if (hasNcdInitialEnc != null) {
 				showNcdFollowupForm = true;
+				
+				// get obs for NCD and Diabetes
+				List<Obs> obs = Context.getObsService().getObservations(
+				    Arrays.asList(Context.getPersonService().getPerson(hasNcdInitialEnc.getPatient().getPersonId())),
+				    Arrays.asList(hasNcdInitialEnc),
+				    Arrays.asList(Context.getConceptService().getConceptByUuid(diabetesGroupingConcept), Context
+				            .getConceptService().getConceptByUuid(hypertensionGroupingConcept)), null, null, null,
+				    Arrays.asList("obsId"), null, null, null, null, false);
+				
+				if (!obs.isEmpty() && obs.size() > 1) { // patient is Diabetic & Hypertensive
+					setAlertMessage("Diabetic & Hypertensive");
+				} else { // check for the exact condition
+					if (!obs.isEmpty()) {
+						if (obs.get(0).getConcept().getUuid().equals(diabetesGroupingConcept)) {
+							setAlertMessage("Diabetic");
+						} else if (obs.get(0).getConcept().getUuid().equals(hypertensionGroupingConcept)) {
+							setAlertMessage("Hypertensive");
+						}
+					}
+				}
 			}
 			
 			ret.put(ptId, new BooleanResult(showNcdFollowupForm, this));
@@ -67,6 +93,10 @@ public class ShowNCDFollowupFormCalculation extends AbstractPatientCalculation i
 	
 	@Override
 	public String getFlagMessage() {
-		return "NCD patient";
+		return alertMessage;
+	}
+	
+	public void setAlertMessage(String flagMessage) {
+		this.alertMessage = flagMessage;
 	}
 }

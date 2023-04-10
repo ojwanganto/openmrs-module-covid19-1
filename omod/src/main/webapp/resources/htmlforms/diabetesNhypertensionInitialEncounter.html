@@ -43,7 +43,7 @@
             jq('#transfer-out :input[type=radio]').change(showReferralReason);
             jq('#insurance-type :input[type=radio]').change(handleNhifNumber);
             jq('#diabetic-foot :input[type=radio]').change(handleDiabeticFootRisk);
-            jq('#lifestyle-management :input[type=radio]').change(showNutritionNotes);
+            jq('.lifestyle-management :input[type=checkbox]').change(showNutritionNotes);
         });
 
         var showReferringFacility = function () {
@@ -155,7 +155,7 @@
                 jq('#nhif-number').show();
             } else {
                 jq('#nhif-number').hide();
-                clearHiddenSections([jq('#nhif-number')]);
+                jq('#nhif-number input[type=text]').val("");
             }
         }
 
@@ -163,17 +163,26 @@
             var val = jq(this).val();
 
             if (val == 142452) {
-                jq('#diabetic-foot-risk').hide();
-                clearHiddenSections([jq('#diabetic-foot-risk')]);
+                jq('#diabetic-foot-risk-assessment').hide();
+                clearHiddenSections([jq('#diabetic-foot-risk-assessment')]);
             } else {
-                jq('#diabetic-foot-risk').show();
+                jq('#diabetic-foot-risk-assessment').show();
             }
         }
 
         var showNutritionNotes = function () {
-            var val = jq(this).val();
 
-            if (val == 161011) {
+            var checkedOptions = jq('.lifestyle-management :input[type=checkbox]:checked');
+            var nutritionSelected = false;
+            checkedOptions.each(function (){
+                var val = jq(this).val();
+                if (val == 161011) {
+                    nutritionSelected = true;
+                    return false;
+                }
+            });
+
+            if (nutritionSelected) {
                 jq('#nutrition-notes').show();
             } else {
                 jq('#nutrition-notes').hide();
@@ -250,8 +259,9 @@
 
                 if (hasDiabeticFoot == 142452) {
                     jq('#diabetic-foot-risk').hide()
-                } else {
+                } else if (hasDiabeticFoot == 1066) {
                     jq('#diabetic-foot-risk').show();
+                    jq('#diabetic-foot-risk-assessment').show();
                 }
             });
         </script>
@@ -300,7 +310,7 @@
                         </td>
                     </tr>
                 </obsgroup>
-                <obsgroup groupingConceptId="117399">
+                <obsgroup groupingConceptId="117399AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
                     <tr>
                         <td>Hypertension</td>
                         <td>
@@ -820,9 +830,30 @@
                 <tr>
                     <td>Diabetic foot</td>
                     <td>
-                        <obs id="diabetic-foot" conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                        <obs id="diabetic-foot" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
                              answerConceptIds="142452AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="radio" answerLabels="Yes,No"/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    </td>
+                    <td></td>
+                </tr>
+                <tr id="diabetic-foot-risk-assessment">
+                    <td>Foot Risk assessment</td>
+                    <td>
+                        <obs class="diabetic-foot" conceptId="165430AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptId="5135AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Loss of sensation"/>
+                        <obs class="diabetic-foot" conceptId="165430AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptId="150518AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Absent pulses"/>
+                        <obs class="diabetic-foot" conceptId="165430AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptId="142677AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Foot deformity"/>
+                        <obs class="diabetic-foot" conceptId="165430AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptId="163411AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="History of ulcer"/>
+                        <obs class="diabetic-foot" conceptId="165430AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptId="164009AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="checkbox" answerLabel="Prior amputation"/>&nbsp;
                     </td>
                     <td></td>
                 </tr>
@@ -853,48 +884,48 @@
             <table>
                 <tr>
                     <td>
-                        <obs class="complications" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                        <obs class="complications" conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
                              answerConceptId="111103AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="checkbox" answerLabel="Stroke"/>
                     </td>
                     <td>
-                        <obs class="complications" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                        <obs class="complications" conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
                              answerConceptId="159298AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="checkbox" answerLabel="Visual Impairment"/>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <obs class="complications" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                        <obs class="complications" conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
                              answerConceptId="139069AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="checkbox" answerLabel="Heart failure"/>
                     </td>
                     <td>
-                        <obs class="complications" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                        <obs class="complications" conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
                              answerConceptId="163411AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="checkbox" answerLabel="Foot ulcers/deformities"/>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <obs class="complications" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                        <obs class="complications" conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
                              answerConceptId="6033AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="checkbox" answerLabel="Renal disease"/>
                     </td>
                     <td>
-                        <obs class="complications" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                        <obs class="complications" conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
                              answerConceptId="116123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="checkbox" answerLabel="Erectile dysfunction"/>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <obs class="complications" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                        <obs class="complications" conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
                              answerConceptId="118983AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="checkbox" answerLabel="Peripheral Neuropathy"/>
                     </td>
                     <td>
-                        <obs class="complications" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                        <obs class="complications" conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
                              answerConceptId="5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="checkbox" answerLabel="Others"/>
                     </td>
@@ -912,7 +943,7 @@
                     </td>
                     <td>
                         <obs class="lifestyle-management" conceptId="166937AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
-                             answerConceptId="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             answerConceptId="159364AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="checkbox" answerLabel="Physical Activities"/>
                     </td>
                     <td>

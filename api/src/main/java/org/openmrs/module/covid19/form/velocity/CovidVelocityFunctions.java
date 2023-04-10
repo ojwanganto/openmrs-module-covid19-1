@@ -12,13 +12,21 @@ package org.openmrs.module.covid19.form.velocity;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Encounter;
+import org.openmrs.EncounterType;
 import org.openmrs.Obs;
 import org.openmrs.calculation.result.CalculationResult;
 import org.openmrs.module.covid19.ModuleConstants;
 import org.openmrs.module.covid19.calculation.library.covid.CovidVelocityCalculation;
+import org.openmrs.module.covid19.metadata.CovidMetadata;
+import org.openmrs.module.covid19.util.CovidUtils;
 import org.openmrs.module.htmlformentry.FormEntrySession;
 import org.openmrs.module.kenyaemr.calculation.EmrCalculationUtils;
 import org.openmrs.module.kenyaemr.util.EmrUtils;
+import org.openmrs.module.metadatadeploy.MetadataUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Velocity functions for adding logic to HTML forms
@@ -75,6 +83,35 @@ public class CovidVelocityFunctions {
 			}
 		}
 		return "";
+	}
+	
+	public List<Integer> getExistingComplaints() {
+		List<Integer> responseConceptIds = new ArrayList<Integer>();
+		int existingComplaintsConceptId = 1628;
+		int newComplaintsConceptId = 6042;
+		
+		if (session.getPatient() == null) {
+			return responseConceptIds;
+		} else {
+			EncounterType ncdInitialEncType = MetadataUtils.existing(EncounterType.class,
+			    CovidMetadata._EncounterType.DIABETES_HYPERTENSION_TREATMENT_INITIAL_ENCOUNTER);
+			
+			EncounterType ncdFollowupEncType = MetadataUtils.existing(EncounterType.class,
+			    CovidMetadata._EncounterType.DIABETES_HYPERTENSION_TREATMENT_FOLLOWUP_ENCOUNTER);
+			
+			Encounter lastNcdEncounter = CovidUtils.lastEncounter(session.getPatient(),
+			    Arrays.asList(ncdFollowupEncType, ncdFollowupEncType));
+			if (lastNcdEncounter != null) {
+				for (Obs o : lastNcdEncounter.getObs()) {
+					if (o.getConcept().getConceptId().equals(existingComplaintsConceptId)
+					        || o.getConcept().getConceptId().equals(newComplaintsConceptId)) {
+						responseConceptIds.add(o.getValueCoded().getConceptId());
+					}
+				}
+				return responseConceptIds;
+			}
+		}
+		return responseConceptIds;
 	}
 	
 }
