@@ -22,9 +22,11 @@
             jq('.hospital-referral').hide();
             jq('#pcr-test').hide();
             jq('#case-classification').hide();
-            
+            jq('#medication-given').hide();
+
             jq("#action-taken select").change(actionTakenResponse);
             jq('#rdt-test-result :input[type=radio]').change(rdtResult);
+            jq('#eligible-for-therapeutics :input[type=radio]').change(manageTherapy);
 
         });
 
@@ -62,6 +64,16 @@
             } else{
                 hidePCRSection();
                 hideReferralSection();
+            }
+        }
+
+        function manageTherapy() {
+            var val = jq(this).val();
+            if (val == 1065){
+                jq('#medication-given').show();
+            } else{
+                jq('#medication-given').hide();
+                clearSections(jq('#medication-given'));
             }
         }
 
@@ -127,15 +139,18 @@
             var sampleCollectionDate = jq('#sample-collection-date input[type=hidden]').val();
             var rdtTestResult = jq('#rdt-test-result input[type="radio"]:checked').val();"status-at-reporting"
             var caseClassification = jq('#status-at-reporting input[type="radio"]:checked').val();
-
-            
-            
+            var eligibleForTherapy = jq('#eligible-for-therapeutics input[type="radio"]:checked').val();
+            var therapy = jq('#therapy input[type="radio"]:checked').val();
 
                 if( rdtTestResult == 703 &amp;&amp; caseClassification == undefined ) {
                     getField('status-at-reporting.error').html('This is required. Please indicate').show();
                     return false
                 }
 
+            if( eligibleForTherapy == 1065 &amp;&amp; therapy == undefined ) {
+                getField('therapy.error').html('This is required. Please indicate').show();
+                return false
+            }
 
                 if( actionTaken == 164165 &amp;&amp; hospitalReferred == '' ) {
                     getField('hospital-referred-to.error').html('Please specify hospital referred to').show();
@@ -170,7 +185,8 @@
         jq(document).ready(function(){
 
         var val = getValue('action-taken.value'); 
-        var caseClassificationAtReporting = getValue('status-at-reporting.value'); 
+        var therapy = getValue('therapy.value');
+        var caseClassificationAtReporting = getValue('status-at-reporting.value');
 
         var val = getValue('action-taken.value'); 
 
@@ -186,6 +202,9 @@
             jq('#case-classification').show();
         }
 
+        if (therapy != '') {
+            jq('#medication-given').show();
+        }
     });
     </script>
     </ifMode>
@@ -231,6 +250,22 @@
                         <obs id="status-at-reporting" conceptId="159640AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
                              answerConceptIds="5006AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1498AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1499AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1500AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,164830AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="radio" answerLabels="Asymptomatic,Mild,Moderate,Severe,Critical"/>
+                    </td>
+                </tr>
+                <tr id="medication-eligibility">
+                    <td> Eligible for therapeutics</td>
+                    <td>
+                        <obs id="eligible-for-therapeutics" conceptId="167381AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="radio" answerLabels="Yes,No" required="true"/>
+                    </td>
+                </tr>
+                <tr id="medication-given">
+                    <td> Therapeutic given</td>
+                    <td>
+                        <obs id="therapy" conceptId="1282AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="166700AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,166877AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,165872AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,165874AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             style="radio" answerLabels="Molnupiravir,Paxlovid,Tocilizumab,Baricitinib,Other"/>
                     </td>
                 </tr>
                 <tr></tr>
