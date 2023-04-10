@@ -26,14 +26,14 @@
             jq('#onset-date').hide();
             jq('.consent').hide();
             jq('.declined-consent').hide();
+            jq('.outpatient').hide();
 
 
             jq("#vaccination-question :input[type=radio]").change(onPatientVaccinatedSelected);
             jq("#covid-test-status :input[type=radio]").change(onPatientTestedForCovid);
             jq('#obs-other-symptom :input[type=radio]').change(onChangeOfOtherSymptoms);
             jq('.patient-symptom :input[type=radio]').change(onSelectOfCovidSymptoms);
- /*           jq('#client-eligibility :input[type=radio]').change(clientEligibleForTesting);
-            jq('#client-consent :input[type=radio]').change(clientConsentForTesting);*/
+            jq('#entry-point :input[type=radio]').change(onSelectOfScreeningDepartment);
 
 		});
 
@@ -101,44 +101,35 @@
             }
         }
 
-        /*var clientEligibleForTesting = function () {
+        var onSelectOfScreeningDepartment = function () {
 
-            var val = jq(this).val();
-            if (val == 1065){
-                jq('.consent').show();
-            } else{
-                clearHiddenSections([jq('.consent')]);
-                setValue('decline-reason.value','');
-                jq('.consent').hide();
-                jq('.declined-consent').hide();
+            if(jq(this).val() != 167050) {
+                jq('.outpatient').show();
+            } else {
+                jq('.outpatient').hide();
             }
         }
-
-        var clientConsentForTesting = function () {
-
-            var val = jq(this).val();
-            if (val == 'false'){
-                jq('.declined-consent').show();
-            } else{
-                setValue('decline-reason.value','');
-                jq('.declined-consent').hide();
-            }
-        }*/
-
-
-
-
         beforeSubmit.push(function() {
             //Before submit validations
             pAge = parseInt('<lookup expression="patient.age"/>');
             var encounterDate = getValue('encounter-date.value'); 
             var symptomsOnsetDate = getValue('date-onset-of-symptoms.value');
+            var entryPoint = jq('#entry-point input[type="radio"]:checked').val();
+            var hivStatus = jq('#hiv-status input[type="radio"]:checked').val();
+            var onTbTreatment = jq('#on-tb-treatment input[type="radio"]:checked').val();
+            var patientPregnant = jq('#patient-pregnant');
+
+
+            var covidVaccination = jq('#vaccination-question input[type="radio"]:checked').val();
+            var covidVaccinationCompletionStatus = jq('#completion-status input[type="radio"]:checked').val();
+            var vaccinationSinceLastVisit = jq('#covid-test-status input[type="radio"]:checked').val();
+            var dateTested = jq('#date-tested input[type="text"]').val();
+
             var hasFever = jq('#fever input[type="radio"]:checked').val();
             var hasSoreThroat = jq('#sore-throat input[type="radio"]:checked').val();
 
             var hasWeakness = jq('#weakness input[type="radio"]:checked').val();
             var hasCough = jq('#cough input[type="radio"]:checked').val();
-            var hasDiarrhoea = jq('#diarrhoea input[type="radio"]:checked').val();
 
             var hasDiarrhoea = jq('#diarrhoea input[type="radio"]:checked').val();
             var hasJointPain = jq('#joint-pain input[type="radio"]:checked').val();
@@ -153,31 +144,159 @@
             var lossOfTaste = jq('#obs-taste-smell input[type="radio"]:checked').val();
             var otherSymptomsQuestion = jq('#obs-other-symptom input[type="radio"]:checked').val();
 
-/*            var eligibilityQ = jq('#client-eligibility :input[type=radio]:checked').val();
-            var consentQ = jq('#client-consent :input[type=radio]:checked').val();
-            var declineReasonResponse = jq('#decline-reason :input[type=text]').val();*/
+            var recentTravel = jq('#recent-travel input[type="radio"]:checked').val();
+            var contactToCase = jq('#contact-to-case input[type="radio"]:checked').val();
+            var attendedGathering = jq('#attended-gathering input[type="radio"]:checked').val();
+            var eligibilityToTest = jq('#client-eligibility input[type="radio"]:checked').val();
+
+            if (entryPoint != '' &amp;&amp; entryPoint != 167050) { // entry point is not IPD
+                if (typeof hivStatus ==='undefined') {
+                    getField('hiv-status.error').html('Required').show();
+                    return false;
+                }
+
+                if (typeof onTbTreatment ==='undefined') {
+                    getField('on-tb-treatment.error').html('Required').show();
+                    return false;
+                }
+
+                if (typeof patientPregnant !=='undefined' &amp;&amp; typeof jq('#patient-pregnant input[type="radio"]:checked').val() !== 'undefined') {
+                    getField('patient-pregnant.error').html('Required').show();
+                    return false;
+                }
+
+                if (typeof covidVaccination ==='undefined') {
+                    getField('vaccination-question.error').html('Required').show();
+                    return false;
+                }
+
+                if (covidVaccination == 1065 &amp;&amp; typeof covidVaccinationCompletionStatus === 'undefined') {
+                    getField('completion-status.error').html('Required').show();
+                    return false;
+                }
+
+                if (typeof vaccinationSinceLastVisit ==='undefined') {
+                    getField('covid-test-status.error').html('Required').show();
+                    return false;
+                }
+
+                if (vaccinationSinceLastVisit == 1065 &amp;&amp; dateTested == '') {
+                    getField('date-tested.error').html('Required').show();
+                    return false;
+                }
+
+                // handle symptoms
+
+                if (typeof hasFever ==='undefined') {
+                    getField('fever.error').html('Required').show();
+                    return false;
+                }
+
+                if (typeof hasWeakness ==='undefined') {
+                    getField('weakness.error').html('Required').show();
+                    return false;
+                }
+
+                if (typeof hasSoreThroat ==='undefined') {
+                    getField('sore-throat.error').html('Required').show();
+                    return false;
+                }
+
+                if (typeof hasCough ==='undefined') {
+                    getField('cough.error').html('Required').show();
+                    return false;
+                }
+
+                if (typeof hasDiarrhoea ==='undefined') {
+                    getField('diarrhoea.error').html('Required').show();
+                    return false;
+                }
+
+                if (typeof hasChestPain ==='undefined') {
+                    getField('chest-pain.error').html('Required').show();
+                    return false;
+                }
+
+                if (typeof hasJointPain ==='undefined') {
+                    getField('joint-pain.error').html('Required').show();
+                    return false;
+                }
+
+                if (typeof hasConfusion ==='undefined') {
+                    getField('confusion.error').html('Required').show();
+                    return false;
+                }
+
+                if (typeof vomiting ==='undefined') {
+                    getField('vomiting.error').html('Required').show();
+                    return false;
+                }
+
+                if (typeof hasShortBreath ==='undefined') {
+                    getField('short-breath.error').html('Required').show();
+                    return false;
+                }
+
+                if (typeof hasRunnynose ==='undefined') {
+                    getField('runny-nose.error').html('Required').show();
+                    return false;
+                }
+
+                if (typeof hasHeadache ==='undefined') {
+                    getField('headache.error').html('Required').show();
+                    return false;
+                }
+
+                if (typeof hasAbdominalPain ==='undefined') {
+                    getField('abdominal-pain.error').html('Required').show();
+                    return false;
+                }
+
+                if (typeof hasMuscularPain ==='undefined') {
+                    getField('muscular-pain.error').html('Required').show();
+                    return false;
+                }
+
+                if (typeof lossOfTaste ==='undefined') {
+                    getField('obs-taste-smell.error').html('Required').show();
+                    return false;
+                }
 
 
                 if( symptomsOnsetDate == '' &amp;&amp; (
-                    hasFever == 1065 || hasWeakness == 5226 || hasCough == 1065 || hasSoreThroat == 158843 || hasRunnynose == 113224 || hasShortBreath == 1065 || 
+                    hasFever == 1065 || hasWeakness == 5226 || hasCough == 1065 || hasSoreThroat == 158843 || hasRunnynose == 113224 || hasShortBreath == 1065 ||
                     hasDiarrhoea == 1065 || vomiting == 1065 || hasHeadache == 139084 || hasConfusion == 1065 || hasMuscularPain == 133632 || hasChestPain == 120749 ||
                     hasAbdominalPain == 151 || hasChestPain == 80 || lossOfTaste == 135589 || hasJointPain == 80 || otherSymptomsQuestion == 160632
                 )
-                
+
                 ) {
                     getField('date-onset-of-symptoms.error').html('Please specify the onset date').show();
                     return false
                 }
 
-                /*if( eligibilityQ == 1065 &amp;&amp; consentQ == undefined ) {
-                    getField('client-consent.error').html('Please record consent').show();
-                    return false
+                if (typeof recentTravel ==='undefined') {
+                    getField('recent-travel.error').html('Required').show();
+                    return false;
                 }
 
-                if( consentQ == 'false' &amp;&amp; declineReasonResponse == '' ) {
-                    getField('decline-reason.error').html('Please record reason for declining test').show();
-                    return false
-                }*/
+                if (typeof contactToCase ==='undefined') {
+                    getField('contact-to-case.error').html('Required').show();
+                    return false;
+                }
+
+                if (typeof attendedGathering ==='undefined') {
+                    getField('attended-gathering.error').html('Required').show();
+                    return false;
+                }
+
+                if (typeof eligibilityToTest ==='undefined') {
+                    getField('client-eligibility.error').html('Required').show();
+                    return false;
+                }
+            }
+
+
+
 
             return true;
         });
@@ -209,11 +328,14 @@
             jq(document).ready(function(){
 
             var val = getValue('vaccination-question.value');
+            var entryPoint = getValue('entry-point.value');
             var testedForCovid = getValue('covid-test-status.value');
             var otherCovidSymptom = getValue('obs-other-symptom.value');
             var symptomsOnsetDate = getValue('date-onset-of-symptoms.value');
-            var clientEligibility = getValue('client-eligibility.value');
 
+            if (entryPoint != '' &amp;&amp; entryPoint != 167050) {
+                jq('.outpatient').show();
+            }
             
             if (val == 1065){
                 jq('#vaccination-details').show();
@@ -234,12 +356,6 @@
             if(symptomsOnsetDate != ''){
                 jq('#onset-date').show();
             }
-
-/*            if(clientEligibility == 1065) {
-                jq('.consent').show();
-                jq('.declined-consent').show();
-            }*/
-
 		});
         </script>
     </ifMode>
@@ -268,33 +384,38 @@
 
 
         <fieldset>
-            <legend>General information</legend>
+            <legend>Screening information</legend>
             <table>
                 <tr>
 					<td>Screening Department</td>
 					<td colspan="3">
 						<obs id="entry-point" style="radio" answerSeparator=" "
 							 conceptId="164918AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-							 answerConceptIds="1622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1623AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,5483AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,162049AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,160542AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,162050AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,160541AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,160545AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-							 answerLabels="ANC,PNC,FP,CWC,OPD,CCC,TB,Community"
+							 answerConceptIds="1622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1623AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,5483AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,162049AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,160542AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,162050AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,160541AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,160545AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,167050AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,159493AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+							 answerLabels="ANC,PNC,FP,CWC,OPD,CCC,TB,Community,IPD,NCD"
 							 required="true"
 						/>
 					</td>
 				</tr>
+            </table>
+        </fieldset>
+        <fieldset class="outpatient">
+            <legend>General information</legend>
+            <table>
                 <tr>
                     <td>Is the patient HIV+?</td>
                     <td>
-                        <obs conceptId="1169AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                        <obs id="hiv-status" conceptId="1169AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
                              answerConceptIds="703AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,664AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Yes,No" required="true" />
+                             style="radio" answerLabels="Yes,No" />
                     </td>
                 </tr>
                 <tr>
                     <td>Is the patient currently on TB treatment?</td>
                     <td>
-                        <obs conceptId="162309AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                        <obs id="on-tb-treatment" conceptId="162309AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
                              answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Yes,No" required="true"/>
+                             style="radio" answerLabels="Yes,No"/>
                     </td>
                 </tr>
                 <excludeIf velocityTest="$patient.gender == 'M' ">
@@ -302,9 +423,9 @@
                         <td>Is the patient pregnant?</td>
                         <td>
 
-                            <obs conceptId="5272AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                            <obs id="patient-pregnant" conceptId="5272AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
                                 answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                                style="radio" answerLabels="Yes,No" required="true" />
+                                style="radio" answerLabels="Yes,No" />
                         </td>
                     </tr>
                 </excludeIf>
@@ -312,7 +433,7 @@
                 <tr></tr>
             </table>
         </fieldset>
-        <fieldset>
+        <fieldset class="outpatient">
             <legend>COVID Status</legend>
 
             <table class="simple-table">
@@ -321,7 +442,7 @@
                 <td>
                 <obs id="vaccination-question" conceptId="163100AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                         answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                        answerLabel="" style="radio" required="true"/>
+                        answerLabel="" style="radio"/>
                 </td>
 			</tr>
 
@@ -343,7 +464,7 @@
 					<td>
 						<obs conceptId="165852AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
 							 answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-							 answerLabels="Yes,No" style="radio" id="covid-test-status" required="true"/>
+							 answerLabels="Yes,No" style="radio" id="covid-test-status"/>
 					</td>
 			</tr>
             <tr id="covid-test-date">
@@ -354,7 +475,7 @@
 			</tr>
 		</table>
         </fieldset>
-        <fieldset id="patient-symptoms">
+        <fieldset id="patient-symptoms" class="outpatient">
             <legend>Patient Symptoms</legend>
             <table>
                 <tr>
@@ -362,14 +483,14 @@
                     <td>
                         <obs class="patient-symptom" conceptId="140238AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" " id="fever"
                              answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Yes,No" required="true"/>
+                             style="radio" answerLabels="Yes,No"/>
                     </td>
                     <td>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</td>
                     <td>Fatigue/General Weakness</td>
                     <td>
                         <obs class="patient-symptom" conceptId="122943AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" " id="weakness"
                              answerConceptIds="5226AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Yes,No" required="true"/>
+                             style="radio" answerLabels="Yes,No"/>
                     </td>
                 </tr>
                 <tr>
@@ -377,14 +498,14 @@
                     <td>
                         <obs class="patient-symptom" conceptId="143264AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "  id="cough"
                              answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Yes,No" required="true"/>
+                             style="radio" answerLabels="Yes,No"/>
                     </td>
                     <td>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</td>
                     <td>Sore throat</td>
                     <td>
                         <obs class="patient-symptom" conceptId="162737AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" " id="sore-throat"
                              answerConceptIds="158843AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Yes,No" required="true"/>
+                             style="radio" answerLabels="Yes,No"/>
                     </td>
                 </tr>
                 <tr>
@@ -392,14 +513,14 @@
                     <td>
                         <obs class="patient-symptom" conceptId="163336AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" " id="runny-nose"
                              answerConceptIds="113224AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Yes,No" required="true"/>
+                             style="radio" answerLabels="Yes,No"/>
                     </td>
                     <td>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</td>
                     <td>Difficulty in breathing</td>
                     <td>
                         <obs class="patient-symptom" conceptId="164441AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "   id="short-breath"
                              answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Yes,No" required="true"/>
+                             style="radio" answerLabels="Yes,No"/>
                     </td>
                 </tr>
                 <tr>
@@ -407,7 +528,7 @@
                     <td>
                         <obs class="patient-symptom" conceptId="142412AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "     id="diarrhoea"
                              answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Yes,No" required="true"/>
+                             style="radio" answerLabels="Yes,No"/>
                     </td>
                     <td>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</td>
                     <td>Nausea/vomiting</td>
@@ -423,7 +544,7 @@
                     <td>
                         <obs class="patient-symptom" conceptId="5219AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "    id="headache"
                              answerConceptIds="139084AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Yes,No" required="true"
+                             style="radio" answerLabels="Yes,No"
                         />
                     </td>
                     <td>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</td>
@@ -431,7 +552,7 @@
                     <td>
                         <obs class="patient-symptom" conceptId="6023AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "    id="confusion"
                              answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Yes,No" required="true"
+                             style="radio" answerLabels="Yes,No"
                         />
                     </td>
                 </tr>
@@ -448,7 +569,7 @@
                     <td>
                         <obs class="patient-symptom" conceptId="1123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "    id="chest-pain"
                              answerConceptIds="120749AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Yes,No" required="true"
+                             style="radio" answerLabels="Yes,No"
                         />
                     </td>
                 </tr>
@@ -472,7 +593,7 @@
                 <tr>
                     <td>Loss of taste/smell</td>
                     <td>
-                        <obs class="patient-symptom" required="true" id="obs-taste-smell" conceptId="1729" labelText=" "
+                        <obs class="patient-symptom" id="obs-taste-smell" conceptId="1729" labelText=" "
                              answerConceptIds="135589AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="radio" answerLabels="Yes,No"/>
                     </td>
@@ -503,36 +624,36 @@
                 </tr>
             </table>
         </fieldset>
-        <fieldset>
+        <fieldset class="outpatient">
             <legend>Other possible exposure</legend>
             <table>
                 <tr>
                     <td>Recent travel out of town?</td>
                     <td>
-                        <obs conceptId="162619AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                        <obs id="recent-travel" conceptId="162619AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
                              answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Yes,No" required="true"/>
+                             style="radio" answerLabels="Yes,No"/>
                     </td>
                 </tr>
                 <tr>
                     <td>Suspected contact of a positive case?</td>
                     <td>
-                        <obs conceptId="162633AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                        <obs id="contact-to-case" conceptId="162633AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
                              answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Yes,No" required="true"/>
+                             style="radio" answerLabels="Yes,No"/>
                     </td>
                 </tr>
                 <tr>
                     <td>Attended any large gatherings?</td>
                     <td>
-                        <obs conceptId="165163" labelText=" "
+                        <obs id="attended-gathering" conceptId="165163" labelText=" "
                              answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Yes,No" required="true"/>
+                             style="radio" answerLabels="Yes,No"/>
                     </td>
                 </tr>
             </table>
         </fieldset>
-        <fieldset>
+        <fieldset class="outpatient">
             <legend>Eligibility and consent for testing</legend>
             <table>
                 <tr>
@@ -540,7 +661,7 @@
                     <td>
                         <obs conceptId="165087" labelText=" " id="client-eligibility"
                              answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Yes,No" required="true"/>
+                             style="radio" answerLabels="Yes,No"/>
                     </td>
                 </tr>
             </table>
