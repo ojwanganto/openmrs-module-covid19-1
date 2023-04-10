@@ -22,8 +22,11 @@ import org.openmrs.module.kenyacore.calculation.AbstractPatientCalculation;
 import org.openmrs.module.kenyacore.calculation.BooleanResult;
 import org.openmrs.module.kenyacore.calculation.Filters;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
@@ -45,6 +48,8 @@ public class ScreenedForCovidTestCalculation extends AbstractPatientCalculation 
 		
 		Set<Integer> alive = Filters.alive(cohort, context);
 		CalculationResultMap ret = new CalculationResultMap();
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		
 		for (int ptId : cohort) {
 			boolean eligible = false;
 			// Check clients with covid encounters
@@ -54,7 +59,9 @@ public class ScreenedForCovidTestCalculation extends AbstractPatientCalculation 
 			
 			if (alive.contains(ptId) && lastCovidEncounter != null) {
 				if (lastCovidEncounter.getEncounterType().getUuid().equals(CovidMetadata._EncounterType.COVID_SCREENING)) {
-					eligible = true;
+					String dateToday = dateFormat.format(new Date());
+					String encounterDate = dateFormat.format(lastCovidEncounter.getEncounterDatetime());
+					eligible = dateToday.equals(encounterDate);
 				}
 			}
 			
