@@ -17,6 +17,7 @@
     <script type="text/javascript" src="../moduleResources/kenyaemr/scripts/moment.js"></script>
     <script type="text/javascript">
 
+        var PATIENT_NHIF_NUMBER = <lookup expression="covid19.hasNHIFNumber()"/>;
 
         jQuery(document).ready(function () {
 
@@ -48,6 +49,10 @@
             jq('.lifestyle-management :input[type=checkbox]').change(showNutritionNotes);
             jq('#pregnancy-status :input[type=radio]').change(handlePregnancyDetails);
 
+            if (PATIENT_NHIF_NUMBER) {
+                jq('#nhif-number').show();
+                jq('#insurance-type :input[type=radio][value=1917]').prop('checked', true);
+            }
 
         });
 

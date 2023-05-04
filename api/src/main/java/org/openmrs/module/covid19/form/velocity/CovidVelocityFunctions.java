@@ -14,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
 import org.openmrs.Obs;
+import org.openmrs.PatientIdentifierType;
 import org.openmrs.calculation.result.CalculationResult;
 import org.openmrs.module.covid19.ModuleConstants;
 import org.openmrs.module.covid19.calculation.library.covid.CovidVelocityCalculation;
@@ -21,6 +22,8 @@ import org.openmrs.module.covid19.metadata.CovidMetadata;
 import org.openmrs.module.covid19.util.CovidUtils;
 import org.openmrs.module.htmlformentry.FormEntrySession;
 import org.openmrs.module.kenyaemr.calculation.EmrCalculationUtils;
+import org.openmrs.module.kenyaemr.metadata.CommonMetadata;
+import org.openmrs.module.kenyaemr.metadata.HivMetadata;
 import org.openmrs.module.kenyaemr.util.EmrUtils;
 import org.openmrs.module.metadatadeploy.MetadataUtils;
 
@@ -114,4 +117,18 @@ public class CovidVelocityFunctions {
 		return responseConceptIds;
 	}
 	
+	/**
+	 * Checks whether the patient has NHIF identifier
+	 * 
+	 * @return the identifier if patient has such an identifier
+	 */
+	public boolean hasNHIFNumber() {
+		String NHIF_Identifier_Uuid = "09ebf4f9-b673-4d97-b39b-04f94088ba64";
+		if (session.getPatient() == null) {
+			return false;
+		} else {
+			PatientIdentifierType pit = MetadataUtils.existing(PatientIdentifierType.class, NHIF_Identifier_Uuid);
+			return session.getPatient().getPatientIdentifier(pit) != null;
+		}
+	}
 }

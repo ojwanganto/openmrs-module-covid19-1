@@ -17,24 +17,32 @@
     <script type="text/javascript" src="../moduleResources/kenyaemr/scripts/moment.js"></script>
     <script type="text/javascript">
 
+        var PATIENT_HAS_UPN = <lookup expression="kenyaemr.hasHivUniquePatientNumber()" />;
+        var PATIENT_NHIF_NUMBER = <lookup expression="covid19.hasNHIFNumber()"/>;
+
 
         jQuery(document).ready(function () {
 
             jq('#diabetesType').hide();
+            jq('#dm-diagnosis-date').hide();
+            jq('#ht-diagnosis-date').hide();
             jq('#nhif-number').hide();
             jq('#enrolledInCare').hide();
             jq('.external-referral').css('display','none');
             jq('.internal-referral').css('display','none');
-            jq('#tb-test-ordered').hide()
-            jq('#tb-results').hide()
-            jq('#stopped-smoking').hide()
-            jq('#stopped-alcohol').hide()
-            jq('#referral-reason').hide()
-            jq('#diabetic-foot-risk').hide()
-            jq('#nutrition-notes').hide()
+            jq('#tb-test-ordered').hide();
+            jq('#tb-results').hide();
+            jq('#stopped-smoking').hide();
+            jq('#stopped-alcohol').hide();
+            jq('#referral-reason').hide();
+            jq('#diabetic-foot-risk').hide();
+            jq('#nutrition-notes').hide();
+            jq('#diabetic-foot-risk-assessment').hide();
+            jq('#cessation-counseling').hide();
 
 
             jq("#diabetic-patient :input[type=radio]").change(showDiabetisType);
+            jq("#ht-patient :input[type=radio]").change(showHypertensionDiagnosisDetails);
             jq("#hiv-status :input[type=radio]").change(showHivEnrollmentSection);
             jq('#patientReferral :input[type=radio]').change(showReferringFacility);
             jq('#hasTbFeatures :input[type=radio]').change(showTBScreeningSections);
@@ -44,6 +52,17 @@
             jq('#insurance-type :input[type=radio]').change(handleNhifNumber);
             jq('#diabetic-foot :input[type=radio]').change(handleDiabeticFootRisk);
             jq('.lifestyle-management :input[type=checkbox]').change(showNutritionNotes);
+
+            if (PATIENT_HAS_UPN) {
+                jq('#hiv-status :input[type=radio][value=703]').prop('checked', true);
+                jq('#enrolledInCare').show();
+                jq('#enrolledInCare :input[type=radio][value=1065]').prop('checked', true);
+            }
+
+            if (PATIENT_NHIF_NUMBER) {
+                jq('#nhif-number').show();
+                jq('#insurance-type :input[type=radio][value=1917]').prop('checked', true);
+            }
         });
 
         var showReferringFacility = function () {
@@ -52,11 +71,11 @@
             if (ans == "true") {
                 jq('.internal-referral').show();
                 jq('.external-referral').hide();
-                clearHiddenSections([jq('.external-referral')]);
+                jq('.external-referral input[type=text]').val("");
             } else {
                 jq('.internal-referral').hide();
+                clearHiddenSections([jq('#referringFacility')]);
                 jq('.external-referral').show();
-                clearHiddenSections([jq('.internal-referral')]);
             }
         }
 
@@ -65,9 +84,23 @@
             var val = jq(this).val();
             if (val == 1065 || val == 1066) {
                 jq('#diabetesType').show();
+                jq('#dm-diagnosis-date').show();
             } else {
                 clearHiddenSections([jq('#diabetesType')]);
                 jq('#diabetesType').hide();
+                jq('#dm-diagnosis-date').hide();
+                jq('#dm-diagnosis-date input[type=text]').val("");
+            }
+        }
+
+        var showHypertensionDiagnosisDetails = function () {
+
+            var val = jq(this).val();
+            if (val == 1065 || val == 1066) {
+                jq('#ht-diagnosis-date').show();
+            } else {
+                jq('#ht-diagnosis-date').hide();
+                jq('#ht-diagnosis-date input[type=text]').val("");
             }
         }
 
@@ -299,8 +332,8 @@
                                  style="radio" answerLabels="New DM patient,Known DM patient"/>
                         </td>
                         <td>
-                            <obs conceptId="159948AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" allowFutureDates="false"
-                                 showTime="false" labelText="Date of Diagnosis" id="date-tested"/>
+                            <obs id="dm-diagnosis-date" conceptId="159948AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" allowFutureDates="false"
+                                 showTime="false" labelText="Date of Diagnosis"/>
                         </td>
 
                         <td>
@@ -314,13 +347,13 @@
                     <tr>
                         <td>Hypertension</td>
                         <td>
-                            <obs conceptId="1687AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                            <obs id="ht-patient" conceptId="1687AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
                                  answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                                  style="radio" answerLabels="New HTN patient,Known HTN patient"/>
                         </td>
                         <td>
-                            <obs conceptId="159948AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" allowFutureDates="false"
-                                 showTime="false" labelText="Date of Diagnosis" id="date-tested"/>
+                            <obs id="ht-diagnosis-date" conceptId="159948AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" allowFutureDates="false"
+                                 showTime="false" labelText="Date of Diagnosis"/>
                         </td>
                     </tr>
                 </obsgroup>
@@ -335,7 +368,7 @@
                     <td>
                         <obs id="enrolledInCare" conceptId="159811AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText="If HIV +ve, Enrolled to care"
                              answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Yes,No" required="true"/>
+                             style="radio" answerLabels="Yes,No"/>
                     </td>
                 </tr>
             </table>
