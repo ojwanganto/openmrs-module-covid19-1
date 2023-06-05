@@ -98,6 +98,7 @@
                 <ref bean="kenyaemr.covid.form.clinical.review"/>
                 <ref bean="kenyaemr.ncd.initial.encounter"/>
                 <ref bean="kenyaemr.ncd.followup.encounter"/>
+                <ref bean="kenyaemr.post.covid.screening"/>
             </set>
         </property>
     </bean>

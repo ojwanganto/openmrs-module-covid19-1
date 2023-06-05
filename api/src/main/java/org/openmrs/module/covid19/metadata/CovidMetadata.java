@@ -59,8 +59,9 @@ public class CovidMetadata extends AbstractMetadataBundle {
 		public static final String DIABETES_HYPERTENSION_TREATMENT_INITIAL_ENCOUNTER = "1f22776c-9d35-48d5-ab56-9c751007bc63";
 		
 		public static final String DIABETES_HYPERTENSION_TREATMENT_FOLLOWUP_ENCOUNTER = "7fb8da8a-0513-4bf4-961a-dcce3fa8c511";
+		
 		public static final String POST_COVID_SCREENING_ENCOUNTER = "d47edf70-520b-43e9-ae2d-5e09aa68fb8a";
-
+		
 	}
 	
 	public static final class _Form {
@@ -83,8 +84,9 @@ public class CovidMetadata extends AbstractMetadataBundle {
 		public static final String DIABETES_HYPERTENSION_TREATMENT_INITIAL_ENCOUNTER = "102246ff-04ac-4317-b58f-e0d82fd9afd9";
 		
 		public static final String DIABETES_HYPERTENSION_TREATMENT_FOLLOWUP_ENCOUNTER = "5a2aa5b9-f6d3-4127-a65c-0d9dcfe2bd31";
+		
 		public static final String POST_COVID_SCREENING_FORM = "5017d5c3-fc3f-4236-bab0-b7419c28befb";
-
+		
 	}
 	
 	@Override
@@ -118,10 +120,10 @@ public class CovidMetadata extends AbstractMetadataBundle {
 		    _EncounterType.DIABETES_HYPERTENSION_TREATMENT_INITIAL_ENCOUNTER));
 		install(encounterType("DM-HTN Continuation of care", "Diabetes and Hypertension continuation of care encounter",
 		    _EncounterType.DIABETES_HYPERTENSION_TREATMENT_FOLLOWUP_ENCOUNTER));
-
+		
 		install(encounterType("Post-COVID conditions screening encounter", "Post-COVID conditions screening encounter",
-				_EncounterType.POST_COVID_SCREENING_ENCOUNTER));
-
+		    _EncounterType.POST_COVID_SCREENING_ENCOUNTER));
+		
 		install(form("COVID-19 Assessment form", null, _EncounterType.COVID_19_ASSESSMENT, "1",
 		    _Form.COVID_19_ASSESSMENT_FORM));
 		
@@ -147,10 +149,9 @@ public class CovidMetadata extends AbstractMetadataBundle {
 		install(form("DM-HTN Continuation of care", "Diabetes-Hypertension Continuation of care",
 		    _EncounterType.DIABETES_HYPERTENSION_TREATMENT_FOLLOWUP_ENCOUNTER, "1",
 		    _Form.DIABETES_HYPERTENSION_TREATMENT_FOLLOWUP_ENCOUNTER));
-
+		
 		install(form("Post-COVID conditions screening form", "Post-COVID conditions screening form",
-				_EncounterType.POST_COVID_SCREENING_ENCOUNTER, "1",
-				_Form.POST_COVID_SCREENING_FORM));
+		    _EncounterType.POST_COVID_SCREENING_ENCOUNTER, "1", _Form.POST_COVID_SCREENING_FORM));
 		
 		install(program("COVID-19 Treatment", "COVID-19 Treatment Program", _Concept.COVID_TREATMENT,
 		    _Program.COVID_TREATMENT));

@@ -16,66 +16,40 @@
 
     <script type="text/javascript" src="../moduleResources/kenyaemr/scripts/moment.js"></script>
     <script type="text/javascript">
-
-            
 		jQuery(document).ready(function(){
 
-            jq("#vaccination-details").hide();
-            jq("#covid-test-date").hide();
-            jq('#specify-symptoms').hide();
-            jq('#onset-date').hide();
-            jq('.consent').hide();
-            jq('.declined-consent').hide();
-            jq('.outpatient').hide();
+            jq("#tr-covid-diagnosis").hide();
+            jq("#tr-covid-test-result").hide();
+            jq('#tr-patient-vaccination').hide();
+            jq('#tr-tca').hide();
+            jq('#other-symptoms').hide();
+            jq('.symptom-progression input').prop('disabled',true);
+            jq('.symptom-present input').prop('disabled',true);
 
+            // hide sections unless a client is documented to have had a positive covid result
+            jq('.pre-covid-symptoms').hide();
+            jq('#post-covid-symptoms').hide();
+            jq('#other-symptoms').hide();
+            jq('#patient-followup').hide();
 
-            jq("#vaccination-question :input[type=radio]").change(onPatientVaccinatedSelected);
+            jq("#patient-vaccinated :input[type=radio]").change(onPatientVaccinatedSelected);
             jq("#covid-test-status :input[type=radio]").change(onPatientTestedForCovid);
-            jq('#obs-other-symptom :input[type=radio]').change(onChangeOfOtherSymptoms);
-            jq('.patient-symptom :input[type=radio]').change(onSelectOfCovidSymptoms);
-            jq('#entry-point :input[type=radio]').change(onSelectOfScreeningDepartment);
+            jq("#covid-test-result :input[type=radio]").change(hasCovidResults);
+            jq("#followup-consent :input[type=radio]").change(followupConsent);
+            jq("#other-post-covid-symptoms :input[type=checkbox]").change(showOtherPostCovidSymptoms);
+            jq('.selected-symptom :input[type=checkbox]').change(collectProblemDetails);
 
 		});
 
-        var onSelectOfCovidSymptoms = function () {
-            var symptomsOnsetDate = getValue('date-onset-of-symptoms.value');
-            var hasFever = jq('#fever input[type="radio"]:checked').val();
-            var hasSoreThroat = jq('#sore-throat input[type="radio"]:checked').val();
+        var collectProblemDetails = function () {
 
-            var hasWeakness = jq('#weakness input[type="radio"]:checked').val();
-            var hasCough = jq('#cough input[type="radio"]:checked').val();
-            var hasDiarrhoea = jq('#diarrhoea input[type="radio"]:checked').val();
-
-            var hasDiarrhoea = jq('#diarrhoea input[type="radio"]:checked').val();
-            var hasJointPain = jq('#joint-pain input[type="radio"]:checked').val();
-            var hasChestPain = jq('#chest-pain input[type="radio"]:checked').val();
-            var hasConfusion = jq('#confusion input[type="radio"]:checked').val();
-            var vomiting = jq('#vomiting input[type="radio"]:checked').val();
-            var hasShortBreath = jq('#short-breath input[type="radio"]:checked').val();
-            var hasRunnynose = jq('#runny-nose input[type="radio"]:checked').val();
-            var hasHeadache = jq('#headache input[type="radio"]:checked').val();
-            var hasAbdominalPain = jq('#abdominal-pain input[type="radio"]:checked').val();
-            var hasMuscularPain = jq('#muscular-pain input[type="radio"]:checked').val();
-            var lossOfTaste = jq('#obs-taste-smell input[type="radio"]:checked').val();
-            var otherSymptomsQuestion = jq('#obs-other-symptom input[type="radio"]:checked').val();
-
-            if(     hasFever == 1065 || hasWeakness == 5226 || hasCough == 1065 || hasSoreThroat == 158843 || hasRunnynose == 113224 || hasShortBreath == 1065 || 
-                    hasDiarrhoea == 1065 || vomiting == 1065 || hasHeadache == 139084 || hasConfusion == 1065 || hasMuscularPain == 133632 || hasChestPain == 120749 ||
-                    hasAbdominalPain == 151 || hasChestPain == 80 || lossOfTaste == 135589 || hasJointPain == 80 || otherSymptomsQuestion == 160632
-                
-                ) {
-                    jq('#onset-date').show();
-                } else {
-                    jq('#onset-date').hide();
-                }
-        }
-
-        var onChangeOfOtherSymptoms = function () {
-            
-            if(jq(this).val() == 139548) {
-                jq('#specify-symptoms').show();
+            if(jq(this).is(':checked')) {
+                jq(this).closest("tr").find('.symptom-present input').removeAttr('disabled');
+                jq(this).closest("tr").find('.symptom-progression input').removeAttr('disabled');
             } else {
-                jq('#specify-symptoms').hide();
+                jq(this).closest("tr").find('.symptom-present input').attr('disabled', 'disabled');
+                jq(this).closest("tr").find('.symptom-progression input').attr('disabled', 'disabled');
+
             }
         }
 
@@ -83,10 +57,10 @@
            
            var val = jq(this).val();
            if (val == 1065){
-               jq('#vaccination-details').show();
+               jq('#tr-patient-vaccination').show();
            } else{
-               clearHiddenSections([jq('#vaccination-details')]);
-               jq('#vaccination-details').hide();
+               clearHiddenSections([jq('#tr-patient-vaccination')]);
+               jq('#tr-patient-vaccination').hide();
            }
        }
 
@@ -94,211 +68,81 @@
             
             var val = jq(this).val();
             if (val == 1065){
-                jq('#covid-test-date').show();
+                jq('#tr-covid-test-result').show();
             } else{
-                setValue('date-tested.value','');
-                jq('#covid-test-date').hide();
+                jq('#tr-covid-test-result').hide();
+                clearHiddenSections([jq('#tr-covid-test-result')]);
+
+                setValue('latest-diagnosis-date.value','');
+                jq('#tr-covid-diagnosis').hide();
+
             }
         }
 
-        var onSelectOfScreeningDepartment = function () {
+        var hasCovidResults = function () {
 
-            if(jq(this).val() != 167050) {
-                jq('.outpatient').show();
-            } else {
-                jq('.outpatient').hide();
+            var val = jq(this).val();
+            if (val == 703){
+                jq('#tr-covid-diagnosis').show();
+                jq('.pre-covid-symptoms').show();
+                jq('#post-covid-symptoms').show();
+                jq('#patient-followup').show();
+            } else{
+                setValue('latest-diagnosis-date.value','');
+                jq('#tr-covid-diagnosis').hide();
+                jq('.pre-covid-symptoms').hide();
+                jq('#post-covid-symptoms').hide();
+                jq('#patient-followup').hide();
             }
         }
+
+        var followupConsent = function () {
+            var val = jq(this).val();
+            if (val == 'true'){
+                jq('#tr-tca').show();
+            } else{
+                setValue('tca.value','');
+                jq('#tr-tca').hide();
+            }
+        }
+
+
+        var showOtherPostCovidSymptoms = function () {
+
+            if (jq(this).is(':checked')){
+                jq('#other-symptoms').show();
+            } else{
+                jq('#other-symptoms').hide();
+                clearHiddenSections([jq('#other-symptoms')]);
+            }
+        }
+
         beforeSubmit.push(function() {
             //Before submit validations
             pAge = parseInt('<lookup expression="patient.age"/>');
-            pSex = '<lookup expression="patient.gender"/>';// velocityTest="$patient.gender == 'M'
-            var encounterDate = getValue('encounter-date.value'); 
-            var symptomsOnsetDate = getValue('date-onset-of-symptoms.value');
-            var entryPoint = jq('#entry-point input[type="radio"]:checked').val();
-            var hivStatus = jq('#hiv-status input[type="radio"]:checked').val();
-            var onTbTreatment = jq('#on-tb-treatment input[type="radio"]:checked').val();
-            var patientPregnant = jq('#patient-pregnant');
+            pSex = '<lookup expression="patient.gender"/>';
+            var encounterDate = getValue('encounter-date.value');
 
+            var everVaccinated = jq('#patient-vaccinated input[type="radio"]:checked').val();
+            var completedDoses = jq('#dose-completed select').val();
+            var everTestedForCovid = jq('#covid-test-status input[type="radio"]:checked').val();
+            var covidTestResult = jq('#covid-test-result input[type="radio"]:checked').val();
+            var recentCovidDiagnosis = jq('#latest-diagnosis-date input[type="text"]').val();
 
-            var covidVaccination = jq('#vaccination-question input[type="radio"]:checked').val();
-            var covidVaccinationCompletionStatus = jq('#completion-status input[type="radio"]:checked').val();
-            var vaccinationSinceLastVisit = jq('#covid-test-status input[type="radio"]:checked').val();
-            var dateTested = jq('#date-tested input[type="text"]').val();
-
-            var hasFever = jq('#fever input[type="radio"]:checked').val();
-            var hasSoreThroat = jq('#sore-throat input[type="radio"]:checked').val();
-
-            var hasWeakness = jq('#weakness input[type="radio"]:checked').val();
-            var hasCough = jq('#cough input[type="radio"]:checked').val();
-
-            var hasDiarrhoea = jq('#diarrhoea input[type="radio"]:checked').val();
-            var hasJointPain = jq('#joint-pain input[type="radio"]:checked').val();
-            var hasChestPain = jq('#chest-pain input[type="radio"]:checked').val();
-            var hasConfusion = jq('#confusion input[type="radio"]:checked').val();
-            var vomiting = jq('#vomiting input[type="radio"]:checked').val();
-            var hasShortBreath = jq('#short-breath input[type="radio"]:checked').val();
-            var hasRunnynose = jq('#runny-nose input[type="radio"]:checked').val();
-            var hasHeadache = jq('#headache input[type="radio"]:checked').val();
-            var hasAbdominalPain = jq('#abdominal-pain input[type="radio"]:checked').val();
-            var hasMuscularPain = jq('#muscular-pain input[type="radio"]:checked').val();
-            var lossOfTaste = jq('#obs-taste-smell input[type="radio"]:checked').val();
-            var otherSymptomsQuestion = jq('#obs-other-symptom input[type="radio"]:checked').val();
-
-            var recentTravel = jq('#recent-travel input[type="radio"]:checked').val();
-            var contactToCase = jq('#contact-to-case input[type="radio"]:checked').val();
-            var attendedGathering = jq('#attended-gathering input[type="radio"]:checked').val();
-            var eligibilityToTest = jq('#client-eligibility input[type="radio"]:checked').val();
-
-            if (entryPoint != '' &amp;&amp; entryPoint != 167050) { // entry point is not IPD
-                if (typeof hivStatus ==='undefined') {
-                    getField('hiv-status.error').html('Required').show();
-                    return false;
-                }
-
-                if (typeof onTbTreatment ==='undefined') {
-                    getField('on-tb-treatment.error').html('Required').show();
-                    return false;
-                }
-
-                if (pSex == 'F' &amp;&amp; typeof jq('#patient-pregnant input[type="radio"]:checked').val() === 'undefined') {
-                    getField('patient-pregnant.error').html('Required').show();
-                    return false;
-                }
-
-                if (typeof covidVaccination ==='undefined') {
-                    getField('vaccination-question.error').html('Required').show();
-                    return false;
-                }
-
-                if (covidVaccination == 1065 &amp;&amp; typeof covidVaccinationCompletionStatus === 'undefined') {
-                    getField('completion-status.error').html('Required').show();
-                    return false;
-                }
-
-                if (typeof vaccinationSinceLastVisit ==='undefined') {
-                    getField('covid-test-status.error').html('Required').show();
-                    return false;
-                }
-
-                if (vaccinationSinceLastVisit == 1065 &amp;&amp; dateTested == '') {
-                    getField('date-tested.error').html('Required').show();
-                    return false;
-                }
-
-                // handle symptoms
-
-                if (typeof hasFever ==='undefined') {
-                    getField('fever.error').html('Required').show();
-                    return false;
-                }
-
-                if (typeof hasWeakness ==='undefined') {
-                    getField('weakness.error').html('Required').show();
-                    return false;
-                }
-
-                if (typeof hasSoreThroat ==='undefined') {
-                    getField('sore-throat.error').html('Required').show();
-                    return false;
-                }
-
-                if (typeof hasCough ==='undefined') {
-                    getField('cough.error').html('Required').show();
-                    return false;
-                }
-
-                if (typeof hasDiarrhoea ==='undefined') {
-                    getField('diarrhoea.error').html('Required').show();
-                    return false;
-                }
-
-                if (typeof hasChestPain ==='undefined') {
-                    getField('chest-pain.error').html('Required').show();
-                    return false;
-                }
-
-                if (typeof hasJointPain ==='undefined') {
-                    getField('joint-pain.error').html('Required').show();
-                    return false;
-                }
-
-                if (typeof hasConfusion ==='undefined') {
-                    getField('confusion.error').html('Required').show();
-                    return false;
-                }
-
-                if (typeof vomiting ==='undefined') {
-                    getField('vomiting.error').html('Required').show();
-                    return false;
-                }
-
-                if (typeof hasShortBreath ==='undefined') {
-                    getField('short-breath.error').html('Required').show();
-                    return false;
-                }
-
-                if (typeof hasRunnynose ==='undefined') {
-                    getField('runny-nose.error').html('Required').show();
-                    return false;
-                }
-
-                if (typeof hasHeadache ==='undefined') {
-                    getField('headache.error').html('Required').show();
-                    return false;
-                }
-
-                if (typeof hasAbdominalPain ==='undefined') {
-                    getField('abdominal-pain.error').html('Required').show();
-                    return false;
-                }
-
-                if (typeof hasMuscularPain ==='undefined') {
-                    getField('muscular-pain.error').html('Required').show();
-                    return false;
-                }
-
-                if (typeof lossOfTaste ==='undefined') {
-                    getField('obs-taste-smell.error').html('Required').show();
-                    return false;
-                }
-
-
-                if( symptomsOnsetDate == '' &amp;&amp; (
-                    hasFever == 1065 || hasWeakness == 5226 || hasCough == 1065 || hasSoreThroat == 158843 || hasRunnynose == 113224 || hasShortBreath == 1065 ||
-                    hasDiarrhoea == 1065 || vomiting == 1065 || hasHeadache == 139084 || hasConfusion == 1065 || hasMuscularPain == 133632 || hasChestPain == 120749 ||
-                    hasAbdominalPain == 151 || hasChestPain == 80 || lossOfTaste == 135589 || hasJointPain == 80 || otherSymptomsQuestion == 160632
-                )
-
-                ) {
-                    getField('date-onset-of-symptoms.error').html('Please specify the onset date').show();
-                    return false
-                }
-
-                if (typeof recentTravel ==='undefined') {
-                    getField('recent-travel.error').html('Required').show();
-                    return false;
-                }
-
-                if (typeof contactToCase ==='undefined') {
-                    getField('contact-to-case.error').html('Required').show();
-                    return false;
-                }
-
-                if (typeof attendedGathering ==='undefined') {
-                    getField('attended-gathering.error').html('Required').show();
-                    return false;
-                }
-
-                if (typeof eligibilityToTest ==='undefined') {
-                    getField('client-eligibility.error').html('Required').show();
-                    return false;
-                }
+            if (everVaccinated == 1065 &amp;&amp; completedDoses =='') {
+                getField('dose-completed.error').html('Required').show();
+                return false;
             }
 
+            if (everTestedForCovid == 1065 &amp;&amp; typeof covidTestResult ==='undefined') {
+                getField('covid-test-result.error').html('Required').show();
+                return false;
+            }
 
-
-
+            if (everTestedForCovid == 1065 &amp;&amp; recentCovidDiagnosis =='') {
+                getField('latest-diagnosis-date.error').html('Required').show();
+                return false;
+            }
             return true;
         });
 
@@ -319,44 +163,47 @@
             }
         }
 
-        function eventAction(domElement,triggerValue) {
-
-        }
     </script>
      
      <ifMode mode="EDIT">
         <script type="text/javascript">
             jq(document).ready(function(){
 
-            var val = getValue('vaccination-question.value');
-            var entryPoint = getValue('entry-point.value');
+            var covidTestResult = getValue('covid-test-result.value');
             var testedForCovid = getValue('covid-test-status.value');
-            var otherCovidSymptom = getValue('obs-other-symptom.value');
-            var symptomsOnsetDate = getValue('date-onset-of-symptoms.value');
-
-            if (entryPoint != '' &amp;&amp; entryPoint != 167050) {
-                jq('.outpatient').show();
-            }
-            
-            if (val == 1065){
-                jq('#vaccination-details').show();
-            } else{
-                jq('#vaccination-details').hide();
-			}
+            var developedOtherPostCovidSymptoms = getValue('other-post-covid-symptoms.value');
+            var appointmentGiven = getValue('tca.value');
+            var completedCovidDose = getValue('dose-completed.value');
 
             if (testedForCovid == 1065){
-                jq('#covid-test-date').show();
-            } else{
-                jq('#covid-test-date').hide();
-			}
-
-            if(otherCovidSymptom == 139548) {
-                jq('#specify-symptoms').show();
+                jq('#tr-covid-test-result').show();
             }
 
-            if(symptomsOnsetDate != ''){
-                jq('#onset-date').show();
+            if (completedCovidDose != ''){
+                jq('#tr-patient-vaccination').show();
             }
+
+            if (covidTestResult == 703){
+                jq('#tr-covid-diagnosis').show();
+                jq('.pre-covid-symptoms').show();
+                jq('#post-covid-symptoms').show();
+                jq('#patient-followup').show();
+            }
+
+            if(developedOtherPostCovidSymptoms == 5622) {
+                jq('#other-symptoms').show();
+            }
+
+            if(appointmentGiven != ''){
+                jq('#tr-tca').show();
+            }
+
+            // enable radios for existing symptoms, and symptom progress
+            jq('.selected-symptom :input[type=checkbox]:checked').each(function (){
+                jq(this).closest("tr").find('.symptom-present input').removeAttr('disabled');
+                jq(this).closest("tr").find('.symptom-progression input').removeAttr('disabled');
+            });
+
 		});
         </script>
     </ifMode>
@@ -364,8 +211,10 @@
     <style>
 
 
-        .disabled {
-            color: #ebebe4;
+        .add-border {
+            outline: thin solid;
+        }
+
     </style>
 
     <div class="ke-form-header">
@@ -388,12 +237,41 @@
             <legend>Screening information</legend>
             <table>
                 <tr>
+                    <td>Have you ever been vaccinated?</td>
+                    <td>
+                        <obs conceptId="163100AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             answerLabel="" style="radio" id="patient-vaccinated" required="true"/>
+                    </td>
+                </tr>
+                <tr id="tr-patient-vaccination">
+                    <td>Doses completed</td>
+                    <td>
+                        <obs class="dose"  conceptId="1418AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText="" answers="1,2,3" answerLabels="1 dose,2 doses,3 doses" style="dropdown" id="dose-completed" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>Ever tested for COVID-19</td>
+                    <td>
+                        <obs conceptId="165852AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1067AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             answerLabels="Yes,No,Unknown" style="radio" id="covid-test-status" required="true"/>
+                    </td>
+                </tr>
+                <tr id="tr-covid-test-result">
+                    <td> Test results for COVID-19 </td>
+                    <td>
+                        <obs conceptId="166638AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             answerConceptIds="703AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,664AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             answerLabels="Positive,Negative" style="radio" id="covid-test-result"/>
+                    </td>
+                </tr>
+                <tr id="tr-covid-diagnosis">
 					<td>Latest COVID-19 diagnosis date</td>
 					<td colspan="3">
 						<obs id="latest-diagnosis-date"
-							 conceptId="164918AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+							 conceptId="159948AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              allowFutureDates="false"
-							 required="true"
 						/>
 					</td>
 				</tr>
@@ -402,19 +280,8 @@
                     <td colspan="3">
                         <obs id="current-health-status" style="radio" answerSeparator=""
                              conceptId="159640AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             answerConceptIds="164076AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,164077AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,159405AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,160487AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,159407AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             answerLabels="Excellent,Very Good,Good,Average,Poor"
-                             required="true"
-                        />
-                    </td>
-                </tr>
-                <tr>
-                    <td>Did you have any health problems before COVID?</td>
-                    <td colspan="3">
-                        <obs id="pre-covid-conditions" style="radio" answerSeparator=" "
-                             conceptId="164918AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             answerConceptIds="1622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1623AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,5483AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,162049AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,160542AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,162050AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,160541AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,160545AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,167050AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,159493AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             answerLabels="ANC,PNC,FP,CWC,OPD,CCC,TB,Community,IPD,NCD"
+                             answerConceptIds="164077AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,159405AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,160487AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,159407AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             answerLabels="Very Good,Good,Average,Poor"
                              required="true"
                         />
                     </td>
@@ -455,96 +322,287 @@
             </table>
         </fieldset>
 
-        <fieldset id="patient-symptoms" class="outpatient">
+        <fieldset id="post-covid-symptoms">
             <legend>Post-COVID Symptoms</legend>
             <table>
                 <tr>
+                    <th align="left">Condition</th>
+                    <th align="left">Currently present?</th>
+                    <th align="left">Progression after COVID</th>
+                </tr>
+                <tr class="add-border">
                     <obsgroup groupingConceptId="166183AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
-
-                    <td>Breathlessness on mild exertion</td>
                     <td>
                         <obs class="selected-symptom" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
                              answerConceptId="110265AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel=""/>
+                             style="checkbox" answerLabel="Breathlessness on mild exertion"/>
+                    </td>
+                    <td>
+                        <obs class="symptom-present" conceptId="1729AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" answerSeparator="&lt;br /&gt;"
+                             style="radio" answerLabels="Yes,No"/>
                     </td>
                     <td>
                         <obs class="symptom-progression" conceptId="162676AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="162677AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,162679AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,162678AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             answerLabels="Better,Unchanged,Worse" answerSeparator="&lt;br /&gt;"
                              style="radio"/>
-                    </td>
-                    <td>
-                        <obs class="active-symptom" conceptId="1729AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
-                             answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Yes,No"/>
                     </td>
                     </obsgroup>
                 </tr>
-                <tr>
+                <tr class="add-border">
                     <obsgroup groupingConceptId="166183AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
-
-                    <td>Unusual fatigue/worn out/lack of energy</td>
                     <td>
                         <obs class="selected-symptom" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
                              answerConceptId="162718AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel=""/>
+                             style="checkbox" answerLabel="Unusual fatigue/worn out/lack of energy"/>
+                    </td>
+                    <td>
+                        <obs class="symptom-present" conceptId="1729AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" answerSeparator="&lt;br /&gt;"
+                             style="radio" answerLabels="Yes,No"/>
                     </td>
                     <td>
                         <obs class="symptom-progression" conceptId="162676AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="162677AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,162679AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,162678AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             answerLabels="Better,Unchanged,Worse" answerSeparator="&lt;br /&gt;"
                              style="radio"/>
-                    </td>
-                    <td>
-                        <obs class="active-symptom" conceptId="1729AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
-                             answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Yes,No"/>
                     </td>
                     </obsgroup>
                 </tr>
-                <tr>
+                <tr class="add-border">
                     <obsgroup groupingConceptId="166183AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
-
-                    <td>Persistent cough</td>
                     <td>
                         <obs class="selected-symptom" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
                              answerConceptId="143264AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel=""/>
+                             style="checkbox" answerLabel="Persistent cough"/>
+                    </td>
+                    <td>
+                        <obs class="symptom-present" conceptId="1729AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" answerSeparator="&lt;br /&gt;"
+                             style="radio" answerLabels="Yes,No"/>
                     </td>
                     <td>
                         <obs class="symptom-progression" conceptId="162676AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="162677AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,162679AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,162678AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             answerLabels="Better,Unchanged,Worse" answerSeparator="&lt;br /&gt;"
                              style="radio"/>
-                    </td>
-                    <td>
-                        <obs class="active-symptom" conceptId="1729AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
-                             answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Yes,No"/>
                     </td>
                     </obsgroup>
                 </tr>
-                <tr>
+                <tr class="add-border">
                     <obsgroup groupingConceptId="166183AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
-
-                    <td>Memory loss/disturbed sleep/anxiety/mood changes</td>
                     <td>
                         <obs class="selected-symptom" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
                              answerConceptId="121657AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="checkbox" answerLabel=""/>
+                             style="checkbox" answerLabel="Memory loss/disturbed sleep/anxiety/mood changes"/>
+                    </td>
+                    <td>
+                        <obs class="symptom-present" conceptId="1729AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" answerSeparator="&lt;br /&gt;"
+                             style="radio" answerLabels="Yes,No"/>
                     </td>
                     <td>
                         <obs class="symptom-progression" conceptId="162676AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
+                             answerConceptIds="162677AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,162679AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,162678AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             answerLabels="Better,Unchanged,Worse" answerSeparator="&lt;br /&gt;"
                              style="radio"/>
                     </td>
-                    <td>
-                        <obs class="active-symptom" conceptId="1729AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
-                             answerConceptIds="1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                             style="radio" answerLabels="Yes,No"/>
-                    </td>
+                    </obsgroup>
+                </tr>
+                <tr class="add-border">
+                    <obsgroup groupingConceptId="166183AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+                        <td>
+                            <obs id="other-post-covid-symptoms" class="selected-symptom" conceptId="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                 answerConceptId="5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                 style="checkbox" answerLabel="Other"/>
+                        </td>
+                        <td></td>
+                        <td></td>
                     </obsgroup>
                 </tr>
             </table>
         </fieldset>
-        <fieldset>
+        <fieldset id="other-symptoms">
+            <legend>Other symptoms</legend>
+            <table>
+                <tr>
+                    <td>
+                        <table>
+                            <tr>
+                                <td>
+                                    <obs conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                         answerConceptId="110434AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                         style="checkbox" answerLabel="Cognitive impairment"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <obs conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                         answerConceptId="142412AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                         style="checkbox" answerLabel="Diarrhea"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <obs conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                         answerConceptId="133632AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                         style="checkbox" answerLabel="Muscle pain"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <obs conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                         answerConceptId="135367AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                         style="checkbox" answerLabel="Post-exertional malaise"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <obs conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                         answerConceptId="135790AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                         style="checkbox" answerLabel="Lightheadedness"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <obs conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                         answerConceptId="120749AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                         style="checkbox" answerLabel="Chest pain"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <obs conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                         answerConceptId="156759AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                         style="checkbox" answerLabel="Impaired daily function and mobility"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <obs conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                         answerConceptId="80AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                         style="checkbox" answerLabel="Arthralgia"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td>
+                        <table>
+                            <tr>
+                                <td>
+                                    <obs conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                         answerConceptId="121AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                         style="checkbox" answerLabel="Myalgia"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <obs conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                         answerConceptId="6004AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                         style="checkbox" answerLabel="Paresthesia"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <obs conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                         answerConceptId="116616AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                         style="checkbox" answerLabel="Menstrual cycle irregularities"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <obs conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                         answerConceptId="139084AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                         style="checkbox" answerLabel="Headache"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <obs conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                         answerConceptId="140238AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                         style="checkbox" answerLabel="Intermittent fever"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <obs conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                         answerConceptId="130987AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                         style="checkbox" answerLabel="Palpitations"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <obs conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                         answerConceptId="135589AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                         style="checkbox" answerLabel="Anosmia"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <obs conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                         answerConceptId="135588AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                         style="checkbox" answerLabel="Ageusia"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td>
+                        <table>
+                            <tr>
+                                <td>
+                                    <obs conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                         answerConceptId="137755AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                         style="checkbox" answerLabel="Reduced exercise capacity"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <obs conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                         answerConceptId="111525AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                         style="checkbox" answerLabel="Vertigo"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <obs conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                         answerConceptId="123588AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                         style="checkbox" answerLabel="Tinnitus"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <obs conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                         answerConceptId="118983AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                         style="checkbox" answerLabel="Peripheral neuropathy"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <obs conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                         answerConceptId="134255AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                         style="checkbox" answerLabel="Metallic or bitter taste"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <obs conceptId="6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=""
+                                         answerConceptId="512AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                         style="checkbox" answerLabel="Skin rash"/>
+                                </td>
+                            </tr>
+                            <tr></tr>
+                            <tr></tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+        <fieldset id="patient-followup">
             <legend>Follow-up</legend>
             <table>
                 <tr>
-                    <td>Are you currently attending any clinic?</td>
+                    <td>Are you currently attending any COVID-19 clinic?</td>
                     <td>
                         <obs conceptId="1662AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                              style="yes_no" answerLabels="Yes,No"/>
@@ -554,13 +612,19 @@
                     <td>Would you like to be followed up after this call?</td>
                     <td>
                         <obs conceptId="1710AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" labelText=" "
-                             style="yes_no" answerLabels="Yes,No"/>
+                             style="yes_no" answerLabels="Yes,No" id="followup-consent"/>
+                    </td>
+                </tr>
+                <tr id="tr-tca">
+                    <td>Appointment Date</td>
+                    <td>
+                        <obs conceptId="5096AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" allowFutureDates="true" id="tca"/>
                     </td>
                 </tr>
                 <tr>
-                    <td>Appointment Date</td>
+                    <td>Comments</td>
                     <td>
-                        <obs conceptId="5096AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" />
+                        <obs conceptId="160632AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" rows="5" cols="50"/>
                     </td>
                 </tr>
             </table>
