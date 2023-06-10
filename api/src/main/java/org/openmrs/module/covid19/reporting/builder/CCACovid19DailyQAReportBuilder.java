@@ -105,6 +105,10 @@ public class CCACovid19DailyQAReportBuilder extends AbstractReportBuilder {
 		
 		cohortDsd.addColumn("Clients transfer in from another facility", "",
 		    ReportUtils.map(covid19VaccinationIndicatorLibrary.referralsFromOtherFacilities(), indParams), "");
+		cohortDsd.addColumn("Clients screened for post COVID-19 symptoms", "",
+		    ReportUtils.map(covid19VaccinationIndicatorLibrary.postCovidScreening(), indParams), "");
+		cohortDsd.addColumn("Clients with post COVID-19 symptoms", "",
+		    ReportUtils.map(covid19VaccinationIndicatorLibrary.clientsWithPostCovidSymptoms(), indParams), "");
 		
 		/**
 		 * Clients who had a visits (Workload) · Clients who were screened · Clients eligible for

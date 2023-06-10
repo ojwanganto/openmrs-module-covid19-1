@@ -75,6 +75,7 @@
                 <ref bean="kenyaemr.cca.rdt.tests.report"/>
                 <ref bean="kenyaemr.cca.daily.qa.report" />
                 <ref bean="kenyaemr.cca.covid.enrollment.report"/>
+                <ref bean="kenyaemr.post.covid.screening.report"/>
 			</set>
 		</property>
 		<property name="fragments">
@@ -342,6 +343,17 @@
         <property name="targetUuid" value="cfd7f5f2-db9b-4876-83d2-d8efc1325efa" />
         <property name="name" value="Covid-19 treatment enrollment report" />
         <property name="description" value="Covid-19 treatment enrollment report" />
+        <property name="apps">
+            <set>
+                <ref bean="kenyaemr.app.reports" />
+            </set>
+        </property>
+    </bean>
+
+    <bean id="kenyaemr.post.covid.screening.report" class="org.openmrs.module.kenyacore.report.HybridReportDescriptor">
+        <property name="targetUuid" value="55b1082d-957e-4f0b-a4cf-2e4fbddeea20" />
+        <property name="name" value="Post-COVID Screening report" />
+        <property name="description" value="Post-COVID Screening report" />
         <property name="apps">
             <set>
                 <ref bean="kenyaemr.app.reports" />

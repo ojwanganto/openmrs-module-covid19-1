@@ -847,8 +847,109 @@ BEGIN
 
     SELECT "Completed processing NCD followup visit ", CONCAT("Time: ", NOW());
     END$$
-		-- end of dml procedures
 
+    -- Populate etl post covid screening encounter
+    DROP PROCEDURE IF EXISTS sp_populate_etl_post_covid_screening$$
+    CREATE PROCEDURE sp_populate_etl_post_covid_screening()
+    BEGIN
+        SELECT "Processing post covid screening data", CONCAT("Time: ", NOW());
+        insert into kenyaemr_etl.etl_cca_post_covid_screening (
+            uuid,
+            encounter_id,
+            visit_id,
+            patient_id ,
+            location_id,
+            visit_date,
+            encounter_provider,
+            date_created,
+            vaccinated,
+            completed_vaccination_doses,
+            tested_covid,
+            covid_test_result,
+            last_covid_diagnosis_date,
+            health_status,
+            pre_covid_symptoms,
+            post_covid_symptom_breathlessness,
+            post_covid_symptom_breathlessness_active,
+            post_covid_symptom_breathlessness_progression,
+            post_covid_symptom_fatigue,
+            post_covid_symptom_fatigue_active,
+            post_covid_symptom_fatigue_progression,
+            post_covid_symptom_cough,
+            post_covid_symptom_cough_active,
+            post_covid_symptom_cough_progression,
+            post_covid_symptom_memory_loss,
+            post_covid_symptom_memory_loss_active,
+            post_covid_symptom_memory_loss_progression,
+            post_covid_symptom_other,
+            attending_clinic,
+            consented_for_followup,
+            appointment_date,
+            comment,
+            voided
+        )
+        select
+            e.uuid,
+            e.encounter_id as encounter_id,
+            e.visit_id as visit_id,
+            e.patient_id,
+            e.location_id,
+            date(e.encounter_datetime) as visit_date,
+            e.creator as encounter_provider,
+            e.date_created as date_created,
+            max(if(o.concept_id=163100,o.value_coded,null)) as vaccinated,
+            max(if(o.concept_id=1418,o.value_numeric,null)) as completed_vaccination_doses,
+            max(if(o.concept_id=165852,o.value_coded,null)) as tested_covid,
+            max(if(o.concept_id=166638,o.value_coded,null)) as covid_test_result,
+            max(if(o.concept_id=159948,date(o.value_datetime),null)) as last_covid_diagnosis_date,
+            max(if(o.concept_id=159640,o.value_coded,null)) as health_status,
+            group_concat(distinct if(o.concept_id=1628,case o.value_coded when 110265 then 'Breathlessness' when 162718 then 'Unusual fatigue' when 143264 then 'Persistent cough' when 121657 then 'Memory loss' else '' end,null)) as pre_covid_symptoms,
+            max(if(post_covid_symptoms.symptom=110265,post_covid_symptoms.symptom,null)) as post_covid_symptom_breathlessness,
+            max(if(post_covid_symptoms.symptom=110265,post_covid_symptoms.symptom_currently_exist,null)) as post_covid_symptom_breathlessness_active,
+            max(if(post_covid_symptoms.symptom=110265,post_covid_symptoms.post_covid_progression,null)) as post_covid_symptom_breathlessness_progression,
+            max(if(post_covid_symptoms.symptom=162718,post_covid_symptoms.symptom,null)) as post_covid_symptom_fatigue,
+            max(if(post_covid_symptoms.symptom=162718,post_covid_symptoms.symptom_currently_exist,null)) as post_covid_symptom_fatigue_active,
+            max(if(post_covid_symptoms.symptom=162718,post_covid_symptoms.post_covid_progression,null)) as post_covid_symptom_fatigue_progression,
+            max(if(post_covid_symptoms.symptom=143264,post_covid_symptoms.symptom,null)) as post_covid_symptom_cough,
+            max(if(post_covid_symptoms.symptom=143264,post_covid_symptoms.symptom_currently_exist,null)) as post_covid_symptom_cough_active,
+            max(if(post_covid_symptoms.symptom=143264,post_covid_symptoms.post_covid_progression,null)) as post_covid_symptom_cough_progression,
+            max(if(post_covid_symptoms.symptom=121657,post_covid_symptoms.symptom,null)) as post_covid_symptom_memory_loss,
+            max(if(post_covid_symptoms.symptom=121657,post_covid_symptoms.symptom_currently_exist,null)) as post_covid_symptom_memory_loss_active,
+            max(if(post_covid_symptoms.symptom=121657,post_covid_symptoms.post_covid_progression,null)) as post_covid_symptom_memory_loss_progression,
+            max(if(post_covid_symptoms.symptom=5622,'Other',null)) as post_covid_symptom_other,
+            max(if(o.concept_id=1662,o.value_coded,null)) as attending_clinic,
+            max(if(o.concept_id=1710,o.value_coded,null)) as consented_for_followup,
+            max(if(o.concept_id=5096,date(o.value_datetime),null)) as appointment_date,
+            max(if(o.concept_id=160632,o.value_text,null)) as comment,
+            e.voided
+        from encounter e
+                 inner join person p on p.person_id=e.patient_id and p.voided=0
+                 inner join form f on f.form_id=e.form_id and f.uuid = '5017d5c3-fc3f-4236-bab0-b7419c28befb'
+                 left outer join obs o on o.encounter_id=e.encounter_id and o.voided=0
+            and o.concept_id in (163100,1418,165852,166638,159948,159640,1628,1662,1710,5096,160632)
+                 left join (
+            select
+                o.obs_group_id obs_group_id,
+                obsGroup.concept_id groupConcept,
+                o.encounter_id,
+                max(if(o.concept_id = 1284,o.value_coded, null)) as symptom,
+                max(if(o.concept_id = 1729,o.value_coded, null)) as symptom_currently_exist,
+                max(if(o.concept_id = 162676, o.value_coded, null)) as post_covid_progression
+            from obs o
+                     inner join person p on p.person_id=o.person_id and p.voided=0
+                     inner join encounter e on e.encounter_id = o.encounter_id and e.voided=0
+                     inner join form f on f.form_id=e.form_id and f.uuid = '5017d5c3-fc3f-4236-bab0-b7419c28befb'
+                     inner join obs obsGroup on o.obs_group_id = obsGroup.obs_id and obsGroup.concept_id = 166183
+            where o.voided=0 and o.concept_id in(1284,1729,162676)  and e.voided=0 and o.obs_group_id is not null
+            group by o.obs_group_id, o.encounter_id
+        ) post_covid_symptoms on post_covid_symptoms.encounter_id = e.encounter_id
+        where e.voided=0
+        group by e.patient_id, e.encounter_id;
+
+
+        SELECT "Completed processing NCD initial visit data ", CONCAT("Time: ", NOW());
+		-- end of dml procedures
+        END$$
 		SET sql_mode=@OLD_SQL_MODE $$
 
 -- ------------------------------------------- running all procedures -----------------------------
@@ -867,7 +968,7 @@ CALL sp_populate_etl_cca_covid_rdt_test();
 CALL sp_populate_etl_cca_covid_treatment_enrollment();
 CALL sp_populate_etl_cca_covid_clinical_review();
 CALL sp_populate_etl_cca_covid_treatment_enrollment_outcome();
-
+CALL sp_populate_etl_post_covid_screening();
 UPDATE kenyaemr_etl.etl_script_status SET stop_time=NOW() where id= populate_script_id;
 
 SELECT "Completed first time setup", CONCAT("Time: ", NOW());

@@ -19,6 +19,7 @@ DROP TABLE IF EXISTS kenyaemr_etl.etl_cca_covid_treatment_enrollment;
 DROP TABLE IF EXISTS kenyaemr_etl.etl_cca_covid_treatment_enrollment_outcome;
 DROP TABLE IF EXISTS kenyaemr_etl.etl_ncd_initial_visit;
 DROP TABLE IF EXISTS kenyaemr_etl.etl_ncd_followup;
+DROP TABLE IF EXISTS kenyaemr_etl.etl_cca_post_covid_screening;
 
 -------------- create table etl_covid_screening-----------------------
     CREATE TABLE kenyaemr_etl.etl_cca_covid_screening (
@@ -430,6 +431,51 @@ CREATE TABLE kenyaemr_etl.etl_ncd_followup_visit (
     INDEX(patient_id, visit_date)
 );
 SELECT "Successfully created ncd followup visit table";
+
+CREATE TABLE kenyaemr_etl.etl_cca_post_covid_screening (
+     uuid CHAR(38),
+     encounter_id INT(11) NOT NULL PRIMARY KEY,
+     visit_id INT(11) DEFAULT NULL,
+     patient_id INT(11) NOT NULL ,
+     location_id INT(11) DEFAULT NULL,
+     visit_date DATE,
+     encounter_provider INT(11),
+     date_created DATE,
+     vaccinated INT(11),
+     completed_vaccination_doses INT(11),
+     tested_covid INT(11),
+     covid_test_result INT(11),
+     last_covid_diagnosis_date DATE,
+     health_status INT(11),
+     pre_covid_symptoms VARCHAR(200),
+     post_covid_symptom_breathlessness INT(11),
+     post_covid_symptom_breathlessness_active INT(11),
+     post_covid_symptom_breathlessness_progression INT(11),
+     post_covid_symptom_fatigue INT(11),
+     post_covid_symptom_fatigue_active INT(11),
+     post_covid_symptom_fatigue_progression INT(11),
+     post_covid_symptom_cough INT(11),
+     post_covid_symptom_cough_active INT(11),
+     post_covid_symptom_cough_progression INT(11),
+     post_covid_symptom_memory_loss INT(11),
+     post_covid_symptom_memory_loss_active INT(11),
+     post_covid_symptom_memory_loss_progression INT(11),
+     post_covid_symptom_other VARCHAR(200),
+     attending_clinic INT(11),
+     consented_for_followup INT(11),
+     appointment_date DATE,
+     comment VARCHAR(50),
+     voided INT(11),
+     CONSTRAINT FOREIGN KEY (patient_id) REFERENCES kenyaemr_etl.etl_patient_demographics(patient_id),
+     CONSTRAINT unique_uuid UNIQUE(uuid),
+     INDEX(visit_date),
+     INDEX(visit_id),
+     INDEX(encounter_id),
+     INDEX(patient_id),
+     INDEX(patient_id, visit_date)
+);
+SELECT "Successfully created post covid screening table";
+
   UPDATE kenyaemr_etl.etl_script_status SET stop_time=NOW() where id= script_id;
 
 END $$

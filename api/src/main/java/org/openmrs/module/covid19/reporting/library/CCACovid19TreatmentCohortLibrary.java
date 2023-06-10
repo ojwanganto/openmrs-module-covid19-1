@@ -203,4 +203,49 @@ public class CCACovid19TreatmentCohortLibrary {
 		
 		return cd;
 	}
+	
+	/**
+	 * Post covid screening
+	 * 
+	 * @return
+	 */
+	public CohortDefinition postCovidScreening() {
+		SqlCohortDefinition cd = new SqlCohortDefinition();
+		String sqlQuery = "select patient_id from kenyaemr_etl.etl_cca_post_covid_screening where voided = 0 and date(visit_date) = date(:startDate)\n";
+		cd.setName("declinedCovidTest;");
+		cd.setQuery(sqlQuery);
+		cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+		cd.setDescription("screened for covid");
+		
+		return cd;
+	}
+	
+	/**
+	 * Clients with post covid symptoms
+	 * 
+	 * @return
+	 */
+	public CohortDefinition postWithPostCovidSymptoms() {
+		SqlCohortDefinition cd = new SqlCohortDefinition();
+		String sqlQuery = "select patient_id from kenyaemr_etl.etl_cca_post_covid_screening where voided = 0 and date(visit_date) = date(:startDate) "
+		        + "and (post_covid_symptom_breathlessness  is not null or \n"
+		        + "post_covid_symptom_breathlessness_active  is not null or \n"
+		        + "post_covid_symptom_breathlessness_progression  is not null or \n"
+		        + "post_covid_symptom_fatigue  is not null or \n"
+		        + "post_covid_symptom_fatigue_active  is not null or \n"
+		        + "post_covid_symptom_fatigue_progression  is not null or \n"
+		        + "post_covid_symptom_cough  is not null or \n"
+		        + "post_covid_symptom_cough_active  is not null or \n"
+		        + "post_covid_symptom_cough_progression  is not null or \n"
+		        + "post_covid_symptom_memory_loss  is not null or \n"
+		        + "post_covid_symptom_memory_loss_active  is not null or \n"
+		        + "post_covid_symptom_memory_loss_progression  is not null or \n"
+		        + "post_covid_symptom_other is not null)\n";
+		cd.setName("declinedCovidTest;");
+		cd.setQuery(sqlQuery);
+		cd.addParameter(new Parameter("startDate", "Start Date", Date.class));
+		cd.setDescription("screened for covid");
+		
+		return cd;
+	}
 }

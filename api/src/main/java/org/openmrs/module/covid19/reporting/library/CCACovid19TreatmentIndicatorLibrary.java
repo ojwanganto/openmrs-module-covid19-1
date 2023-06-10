@@ -162,4 +162,24 @@ public class CCACovid19TreatmentIndicatorLibrary {
 		return cohortIndicator("declined covid testing",
 		    ReportUtils.map(cohortLibrary.declinedCovidTest(), "startDate=${startDate}"));
 	}
+	
+	/**
+	 * Clients who were screened for post covid symptoms
+	 * 
+	 * @return
+	 */
+	public CohortIndicator postCovidScreening() {
+		return cohortIndicator("post covid screening",
+		    ReportUtils.map(cohortLibrary.postCovidScreening(), "startDate=${startDate}"));
+	}
+	
+	/**
+	 * Clients who developed post covid symptoms
+	 * 
+	 * @return
+	 */
+	public CohortIndicator clientsWithPostCovidSymptoms() {
+		return cohortIndicator("clients with post covid symptoms",
+		    ReportUtils.map(cohortLibrary.postWithPostCovidSymptoms(), "startDate=${startDate}"));
+	}
 }
