@@ -83,7 +83,7 @@ select
   max(if(o.concept_id=162619,(case o.value_coded when 1065 then "Yes" when 1066 then "No" when 1067 then "Unknown" else "" end),null)) as recent_travel,
 	max(if(o.concept_id=162633,(case o.value_coded when 1065 then "Yes" when 1066 then "No" when 1067 then "Unknown" else "" end),null)) as contact_with_suspected_or_confirmed_case,
   max(if(o.concept_id=165163,(case o.value_coded when 1065 then "Yes" when 1066 then "No" else "" end),null)) as attended_large_gathering,
-  max(if(o.concept_id=164918,(case o.value_coded when 1622 then "ANC" when 1623 then "PNC" when 5483 then "FP" when 162049 then "CWC" when 160542 then "OPD" when 162050 then "CCC" when 160541 then "TB" when 160545 then "Community" else "" end),null)) as screening_department,
+  max(if(o.concept_id=164918,(case o.value_coded when 1622 then "ANC" when 1623 then "PNC" when 5483 then "FP" when 162049 then "CWC" when 160542 then "OPD" when 162050 then "CCC" when 160541 then "TB" when 160545 then "Community" when 167050 then "IPD" when 159493 then "NCD" else "" end),null)) as screening_department,
   max(if(o.concept_id=1169,(case o.value_coded when 703 then "Positive" when 664 then "Negative" else "" end),null)) as hiv_status,
   max(if(o.concept_id=162309,(case o.value_coded when 1065 then "Yes" when 1066 then "No" else "" end),null)) as in_tb_program,
   max(if(o.concept_id=5272,(case o.value_coded when 1065 then "Yes" when 1066 then "No" else "" end),null)) as pregnant,
@@ -140,6 +140,7 @@ case_classification,
 patient_admitted,
 admission_unit,
 treatment_received,
+drug_side_effect,
 voided
 )
 select
@@ -163,6 +164,7 @@ select
   max(if(o.concept_id=159640,(case o.value_coded when 5006 then "Asymptomatic" when 1498 then "Mild" when 1499 then "Moderate" when 1500 then "Severe" when 164830 then "Critical" else "" end),null)) as case_classification,
 	max(if(o.concept_id=162477,(case o.value_coded when 1065 then "Yes" when 1066 then "No" else "" end),null)) as patient_admitted,
 	max(if(o.concept_id=161010,(case o.value_coded when 165994 then "Isolation" when 165995 then "HDU" when 161936 then "ICU" else "" end),null)) as admission_unit,
+	max(if(o.concept_id=1512,(case o.value_coded when 1065 then "Yes" when 1066 then "No" else "" end),null)) as drug_side_effect,
   group_concat(if(o.concept_id=159369,o.value_coded,null)) as treatment_received,  e.voided as voided
 from encounter e
 	inner join person p on p.person_id=e.patient_id and p.voided=0
@@ -171,7 +173,7 @@ from encounter e
 		select form_id, uuid,name from form where
 			uuid in('33a3aab6-73ae-11ea-bc55-0242ac130003')
 	) f on f.form_id=e.form_id
-	left outer join obs o on o.encounter_id=e.encounter_id and o.voided=0 and o.concept_id in (165416,5088,140238,143264,164441,162737,163336,5219,1788,159640,162477,161010,159369)
+	left outer join obs o on o.encounter_id=e.encounter_id and o.voided=0 and o.concept_id in (165416,5088,140238,143264,164441,162737,163336,5219,1788,159640,162477,161010,159369,1512)
 where e.voided=0
 group by e.patient_id, e.encounter_id;
 
@@ -286,6 +288,12 @@ insert into kenyaemr_etl.etl_cca_covid_clinical_review(
       date_created,
       ag_rdt_test_result,
       case_classification,
+      eligible_for_therapeutics,
+      molnupiravir_given,
+      paxlovid_given,
+      tocilizumab_given,
+      baricitinib_given,
+      other_given,
       action_taken,
       hospital_referred_to,
       case_id,
@@ -310,7 +318,14 @@ select
 	e.date_created as date_created,
 	max(if(o.concept_id=165852,case o.value_coded when 703 then "Positive" when 664 then "Negative" else "" end,null)) as ag_rdt_test_result,
 	max(if(o.concept_id=159640 and o.obs_group_id is null,case o.value_coded when 5006 then "Asymptomatic" when 1498 then "Mild" when 1499 then "Moderate" when 1500 then "Severe" when 164830 then "Critical" else "" end,null)) as case_classification,
-	max(if(o.concept_id=1272,case o.value_coded when 165901 then "Referred to home based treatment/isolation" when 1654 then "Hospital admission" when 164165 then "Referred to other hospital for treatment" when 165611 then "Referred for PCR" else "" end,null)) as action_taken,
+    max(if(o.concept_id=167381,case o.value_coded when 1065 then "Yes" when 1066 then "No" else "" end,null)) as eligible_for_therapeutics,
+    max(if(o.concept_id=1282 and o.value_coded=166700,"Yes",null)) as molnupiravir_given,
+    max(if(o.concept_id=1282 and o.value_coded=166877,"Yes",null)) as paxlovid_given,
+    max(if(o.concept_id=1282 and o.value_coded=165872,"Yes",null)) as tocilizumab_given,
+    max(if(o.concept_id=1282 and o.value_coded=165874,"Yes",null)) as baricitinib_given,
+    max(if(o.concept_id=1282 and o.value_coded=5622,"Yes",null)) as other_given,
+
+    max(if(o.concept_id=1272,case o.value_coded when 165901 then "Referred to home based treatment/isolation" when 1654 then "Hospital admission" when 164165 then "Referred to other hospital for treatment" when 165611 then "Referred for PCR" else "" end,null)) as action_taken,
 	max(if(o.concept_id=162724,o.value_text,null)) as hospital_referred_to,
 	pcr_test.case_id,
 	pcr_test.email,
@@ -325,7 +340,7 @@ select
 from encounter e
 	inner join person p on p.person_id=e.patient_id and p.voided=0
 	inner join form f on f.form_id=e.form_id and f.uuid = '8fb6dabd-9c14-4d17-baac-97afaf3d203d'
-	left outer join obs o on o.encounter_id=e.encounter_id and o.voided=0 and o.concept_id in (165852,159640,1272,162724,161011)
+	left outer join obs o on o.encounter_id=e.encounter_id and o.voided=0 and o.concept_id in (165852,159640,1272,162724,161011,167381,1282)
 	left join (
 		select
 		o.obs_group_id obs_group_id,
